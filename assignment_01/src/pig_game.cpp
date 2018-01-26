@@ -2,7 +2,7 @@
 // Name: Seiji Emery
 // Compiler: gcc, apple llvm 9.0.0
 // Compiler flags: -std=c++14
-// https://github.com/SeijiEmery/comp235/assignment_01/
+// https://github.com/SeijiEmery/comp235/tree/master/assignment_01
 //
 // Purpose: implements two functions that can be used to play an interactive,
 // command-line version of the game of pig, as well as all internal game logic

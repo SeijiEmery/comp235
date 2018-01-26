@@ -8,4 +8,5 @@ Implements a game of pig using a procedural c-based interface.
     git clone https://github.com/SeijiEmery/comp235
     cd comp235/assignment_01/
     mkdir build; cd build
+    cmake ..
     make run

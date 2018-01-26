@@ -9,4 +9,5 @@ Implements a clothing size calculator using a simple procedural interface.
     git clone https://github.com/SeijiEmery/comp235
     cd comp235/lab_01/
     mkdir build; cd build
+    cmake ..
     make run
