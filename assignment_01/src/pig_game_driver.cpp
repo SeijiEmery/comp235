@@ -8,6 +8,7 @@
 // players, one human and one scripted computer player.
 //
 #include <cstdlib>      // srand()
+#include <ctime>        // time()
 #include "pig_game.h"   // humanTurn(), computerTurn()
 
 

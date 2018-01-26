@@ -6,7 +6,7 @@
 //
 #include "clothing_sizes.h"
 #include <iostream>
-#include <i omanip>
+#include <iomanip>
 using namespace std;
 
 int main () {

@@ -32,4 +32,4 @@ double getJacketSize (double weight, double height, int age);
 //
 double getWaistSize (double weight, int age);
 
-#endif jacketSizes_H
+#endif // jacketSizes_H
