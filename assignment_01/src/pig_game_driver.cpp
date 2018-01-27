@@ -36,8 +36,8 @@ void runPigGame () {
     // Run game until one of the players wins.
     // All I/O is handled by the pig game interface, implemented in  pig_game.cpp
     while (1) {
-        if ((humanScore    += humanTurn   (humanScore))    > 100) return;
-        if ((computerScore += computerTurn(computerScore)) > 100) return;
+        if ((humanScore    += humanTurn   (humanScore))    >= 100) return;
+        if ((computerScore += computerTurn(computerScore)) >= 100) return;
     }
 }
 
