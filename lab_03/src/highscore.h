@@ -6,3 +6,8 @@
 //
 // Purpose: 
 //
+
+#include <string>
+#include <istream>
+
+void getHighScore(std::istream& file, std::string& name, int& score);
