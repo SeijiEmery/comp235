@@ -4,7 +4,8 @@
 // Compiler flags: 
 // https://github.com/SeijiEmery/comp235/tree/master/lab_03
 //
-// Purpose: 
+// Simple program to load a text file containing athlete names + high scores
+// and calculate + print out the highest scoring athlete's name / score.
 //
 
 #include <iostream>

@@ -4,7 +4,7 @@
 // Compiler flags: 
 // https://github.com/SeijiEmery/comp235/tree/master/lab_03
 //
-// Purpose: 
+// Purpose: Implements two functions to convert treadmill values to MPH
 //
 
 #include <stdexcept>	// std::runtime_error
@@ -19,7 +19,7 @@ static void enforceBounded(const char* msg, T value, T min, T max) {
 
 double convertToMPH(int minutes_per_mile, int seconds_per_mile) {
 	enforceBounded("invalid minutes", minutes_per_mile, 0, INT_MAX);
-	enforceBounded("invalid seconds", seconds_per_mile, 0, 60);
+	enforceBounded("invalid seconds", seconds_per_mile, 0, 59);
 	auto m = static_cast<double>(minutes_per_mile);
 	auto s = static_cast<double>(seconds_per_mile);
 	return 1.0 / (m / 60 + s / 3600);

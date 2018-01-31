@@ -4,7 +4,8 @@
 // Compiler flags: 
 // https://github.com/SeijiEmery/comp235/tree/master/lab_03
 //
-// Purpose: 
+// Purpose: Implements an interactive commandline program to convert treadmill
+// speed values into MPH.
 //
 #include <iostream>
 #include <regex>

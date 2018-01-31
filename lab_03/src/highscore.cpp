@@ -4,7 +4,7 @@
 // Compiler flags: 
 // https://github.com/SeijiEmery/comp235/tree/master/lab_03
 //
-// Purpose: 
+// Purpose: implements highscore.h
 //
 
 #include <stdexcept>
