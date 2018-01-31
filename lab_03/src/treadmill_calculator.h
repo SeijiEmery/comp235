@@ -6,3 +6,7 @@
 //
 // Purpose: 
 //
+
+double convertToMPH(int minutes_per_mile, int seconds_per_mile);
+
+double convertToMPH(double kph);
