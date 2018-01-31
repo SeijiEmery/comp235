@@ -1,4 +1,3 @@
-
 #Lab 03
 
 Simple lab with two parts:
