@@ -22,3 +22,6 @@ add_executable(highscore src/highscore_driver.cpp src/highscore.cpp)
 add_custom_target(run_highscore
 	COMMAND ./run_highscore
 	DEPENDS run_highscore)
+
+add_custom_target(run
+	DEPENDS run_highscore run_treadmill)
