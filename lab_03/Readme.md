@@ -1,4 +1,4 @@
-#Lab 03
+# Lab 03
 
 Simple lab with two parts:
 1) implements a program to convert treadmill values into MPH
