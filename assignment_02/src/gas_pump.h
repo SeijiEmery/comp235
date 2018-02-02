@@ -9,5 +9,23 @@
 #ifndef gas_pump_h
 #define gas_pump_h
 
+class GasPump {
+public:
+	void displayAmountDispensed() const;
+	void displayAmountCharged() const;
+	void displayCostPerGallon() const;
+	
+	void startTransaction();
+	void endTransaction();
+	void display
+
+
+	double amountDispensed() const;
+
+
+private:
+	class Impl;
+	Impl* impl;
+};
 
 #endif // gas_pump_h
