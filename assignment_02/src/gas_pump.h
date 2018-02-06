@@ -11,18 +11,24 @@
 
 class GasPump {
 public:
-	void displayAmountDispensed() const;
-	void displayAmountCharged() const;
-	void displayCostPerGallon() const;
-	
-	void startTransaction();
-	void endTransaction();
-	void display
+	GasPump ();
+	virtual ~GasPump ();
 
+	void displayWelcomeScreen () const;
+	void displayGasOptions () const;
+	void displayPumpingScreen () const;
+	void displaySummary () const;
 
-	double amountDispensed() const;
+	void beginTransaction ();
+	void selectGasOption (int option);
+	void beginPumping ();
+	void updatePumped (double qtyGasPumped);
+	void stopPumping ();
+	void printReceipt () const;
+	void endTransaction ();
 
-
+	void addOption (const std::string& name, double pricePerGallon);
+	bool validOption (int option) const;
 private:
 	class Impl;
 	Impl* impl;
