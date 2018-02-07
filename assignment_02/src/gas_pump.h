@@ -8,6 +8,7 @@
 //
 #ifndef gas_pump_h
 #define gas_pump_h
+#include <string>
 
 class GasPump {
 public:

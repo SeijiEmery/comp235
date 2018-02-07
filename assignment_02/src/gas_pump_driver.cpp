@@ -7,18 +7,23 @@
 // Purpose:
 //
 #include "gas_pump.h"
-#include <iostream>
+#include <curses.h>
 using namespace std;
 
 const static char ESC = 27;
 
+void setupDisplay () {
+    initscr();
+    raw();
+    noecho();
+}
 int main() {
     GasPump pump;
 
     // Setup gas prices (hardcoded)
     pump.addOption("Regular", 3.589);
-    pump.addOption("Plus",    3.709);
-    pump.addOption("Diesel",  3.959);
+    pump.addOption("Plus   ", 3.709);
+    pump.addOption("Diesel ", 3.959);
 
     // Program config: pump rate + display rate hardcoded
     double pumpRate    = 1.0;      // Gal / sec
@@ -33,9 +38,7 @@ int main() {
     //
     setupDisplay();
 idle:
-    clearScreen();
     pump.displayWelcomeScreen();
-    printf("Press any key to continue, esc to exit, q or Q to quit\n");
     while (true) {
         switch (getch()) {
             case 0: break;
@@ -46,17 +49,15 @@ idle:
     }
 select_option:
     pump.beginTransaction();
-    clearScreen();
     pump.displayGasOptions();
-    printf("Press [#option] to choose option, esc to cancel\n");
     while (true) {
         int option = getch();
-        switch (getch()) {
+        switch (option) {
             case 0: break;
-            case ESC: goto idle;
+            case ESC: pump.endTransaction(); goto idle;
             default: {
-                if (pump.validOption(option)) {
-                    pump.selectGasOption(option);
+                if (pump.validOption(option - '0')) {
+                    pump.selectGasOption(option - '0');
                     goto start_pumping;
                 }
             }
@@ -65,36 +66,33 @@ select_option:
 start_pumping:
     pump.beginPumping();
     while (true) {
-        clearScreen();
         pump.displayPumpingScreen();
-        printf("Press space to finish");
         switch (getch()) {
-            case ' ': goto stop_pumping;
-            default:
+            case ESC: goto stop_pumping;
+            default:;
         }
         pump.updatePumped(pumpRate / ticksPerSec);
-        sleep( 1.0 / ticksPerSec );
     }
 stop_pumping:
     pump.stopPumping();
-    clearScreen();
     pump.displaySummary();
-    printf("Print reciept? y / n");
+    printw("Would you like a reciept? y / n\n");
     while (1) {
         switch (getch()) {
             case 'y': case 'Y': case ' ': goto print_receipt;
             case 'n': case 'N': case ESC: goto finish_transaction;
-            default:
+            default:;
         }
     }
-display_reciept:
+print_receipt:
     pump.printReceipt();
 finish_transaction:
     pump.endTransaction();
     goto idle;
 ask_quit:
-    clearScreen();
-    printf("Are you sure you want to quit? (y / n)");
+    clear();
+    printw("Are you sure you want to quit? (y / n)\n");
+    refresh();
     while (1) {
         switch (getch()) {
             case 'y': case 'Y': case ' ': goto quit;
@@ -102,5 +100,6 @@ ask_quit:
         }
     }
 quit:
+    printf("Exiting\n");
 	return 0;
 }

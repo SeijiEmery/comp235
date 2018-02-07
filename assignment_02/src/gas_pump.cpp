@@ -7,8 +7,14 @@
 // Purpose: implements gas_pump.h
 //
 #include "gas_pump.h"
+#include <vector>
+#include <utility>
+#include <stdexcept>
+#include <curses.h>
+using namespace std;
 
 class GasPump::Impl {
+public:
     bool   inTransaction  = false;
     bool   isPumping      = false;
     double gasPumped      = 0;
@@ -21,6 +27,12 @@ GasPump::GasPump ()
 {}
 GasPump::~GasPump () {
     delete impl;
+}
+
+void enforce (bool condition, const char* msg) {
+    if (!condition) {
+        throw runtime_error(msg);
+    }
 }
 
 //
@@ -55,11 +67,12 @@ void GasPump::stopPumping () {
     enforce(impl->isPumping, "Did not start pumping!");
     impl->isPumping = false;
 }
-void GasPump::printReceipt () {
-    enfore(impl->inTransaction, "No transaction!");
+void GasPump::printReceipt () const {
+    enforce(impl->inTransaction, "No transaction!");
     enforce(!impl->isPumping, "Cannot print reciept while pumping!");
 
     // Print stuff to a file reciept.txt
+    // Not implemented, whatever
 }
 void GasPump::endTransaction () {
     enforce(impl->inTransaction, "Transaction not started!");
@@ -85,24 +98,43 @@ void GasPump::addOption (const std::string& name, double pricePerGallon) {
 
 void GasPump::displayWelcomeScreen () const {
     enforce(!impl->inTransaction, "Transaction started!");
-
-    // display welcome screen...
+    
+    clear();
+    printw("Welcome to gas-mart\n");
+    printw("Press any key to continue\n");
+    refresh();
 }
 void GasPump::displayGasOptions () const {
     enforce(impl->inTransaction, "Transaction not started!");
     enforce(!impl->isPumping && (impl->gasPumped == 0), "Cannot display options once gas pumping started");
 
-    // display gas options... (as 1-based indexes)
+    clear();
+    printw("Choose an option:\n");
+    for (auto i = 0; i < impl->gasOptions.size(); ++i) {
+        printw("%d: %s $%0.2lf\n", i + 1,
+            get<0>(impl->gasOptions[i]).c_str(),
+            get<1>(impl->gasOptions[i]));
+    }
+    refresh();
 }
 void GasPump::displayPumpingScreen () const {
     enforce(impl->inTransaction, "Transaction not started!");
     enforce(impl->isPumping, "Must be pumping!");
 
-    // display gas pumping info...
+    clear();
+    printw("%s\n", get<0>(impl->gasOptions[impl->optionSelected - 1]).c_str());
+    printw("Gallons: %.2lf\n ", impl->gasPumped);
+    printw("Charge: $%.2lf\n", impl->gasPumped * get<1>(impl->gasOptions[impl->optionSelected - 1]));
+    printw("Press esc to stop pumping\n");
+    refresh();
 }
-void GasPump::displaySummary () cosnt {
+void GasPump::displaySummary () const {
     enforce(impl->inTransaction, "Transaction not started!");
     enforce(!impl->isPumping, "Must have finished pumping!");
 
-    // display gas pumping summary...
+    clear();
+    printw("Finished pumping\n");
+    printw("Gallons: %.2lf\n");
+    printw("Charge: $%.2lf\n");
+    refresh();
 }

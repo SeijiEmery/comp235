@@ -14,6 +14,8 @@ else()
 endif()
 
 add_executable(gas_pump src/gas_pump_driver.cpp src/gas_pump.cpp)
+target_link_libraries(gas_pump curses)
+
 add_custom_target(run
 	COMMAND ./gas_pump
 	DEPENDS gas_pump)
