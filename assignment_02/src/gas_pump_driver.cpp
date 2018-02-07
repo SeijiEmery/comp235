@@ -10,14 +10,19 @@
 //
 #include "gas_pump.h"
 #include <curses.h>
+#include <unistd.h>
+#include <ctime>
 using namespace std;
 
 const static char ESC = 27;
+const static int CLOCK_TICK_RATE = 30;
 
 void setupDisplay () {
     initscr();
     raw();
+    cbreak();
     noecho();
+    timeout(CLOCK_TICK_RATE);
 }
 int main() {
     GasPump pump;
@@ -29,7 +34,6 @@ int main() {
 
     // Program config: pump rate + display rate hardcoded
     double pumpRate    = 1.0;      // Gal / sec
-    double ticksPerSec = 10;
 
     setupDisplay();
 
@@ -43,7 +47,7 @@ idle:
     pump.displayWelcomeScreen();
     while (true) {
         switch (getch()) {
-            case 0: break;
+            case ERR:           continue;
             case 'q': case 'Q': goto quit;
             case ESC:           goto ask_quit;
             default:            goto select_option;
@@ -55,7 +59,7 @@ select_option:
     while (true) {
         int option = getch();
         switch (option) {
-            case 0: break;
+            case ERR: continue;
             case ESC: pump.endTransaction(); goto idle;
             default: {
                 if (pump.validOption(option - '0')) {
@@ -65,16 +69,25 @@ select_option:
             }
         }
     }
-start_pumping:
+start_pumping: {
     pump.beginPumping();
+    clock_t t = clock(), t2 = t;
+    double dt = 0;
+
     while (true) {
         pump.displayPumpingScreen();
+        t2 = clock();
+        dt = static_cast<double>(t2 - t) / static_cast<double>(CLOCKS_PER_SEC) * CLOCK_TICK_RATE;
+        printw("%d, %lf\n", t2 - t, dt);
+        t = t2;
         switch (getch()) {
-            case ESC: goto stop_pumping;
+            case ESC: case ' ': goto stop_pumping;
             default:;
         }
-        pump.updatePumped(pumpRate / ticksPerSec);
+         
+        pump.updatePumped(pumpRate * dt);
     }
+}
 stop_pumping:
     pump.stopPumping();
     pump.displaySummary();
@@ -102,6 +115,7 @@ ask_quit:
         }
     }
 quit:
-    printf("Exiting\n");
+    printw("Exiting\n");
+    endwin();
 	return 0;
 }
