@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (lab01)
+project (lab_01)
 
 # Require c++11
 include(CheckCXXCompilerFlag)

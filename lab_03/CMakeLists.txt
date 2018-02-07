@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (assignment_01)
+project (lab_03)
 
 # Require c++11
 include(CheckCXXCompilerFlag)
@@ -20,8 +20,8 @@ add_custom_target(run_treadmill
 
 add_executable(highscore src/highscore_driver.cpp src/highscore.cpp)
 add_custom_target(run_highscore
-	COMMAND ./run_highscore
-	DEPENDS run_highscore)
+	COMMAND ./highscore
+	DEPENDS highscore)
 
 add_custom_target(run
 	DEPENDS run_highscore run_treadmill)
