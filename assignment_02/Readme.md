@@ -1,6 +1,12 @@
 # Assignment 02
 
-TBD
+Implements a gas pump program.
+
+Commandline, uses <curses.h>
+(and um, won't work on windows - oops)
+
+# Dependencies
+    curses.h
 
 # Build instructions (\*nix)
     cd <some-temp-dir>
