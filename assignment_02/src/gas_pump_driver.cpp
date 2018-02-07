@@ -4,7 +4,9 @@
 // Compiler flags: 
 // https://github.com/SeijiEmery/comp235/tree/master/assignment_02
 //
-// Purpose:
+// Purpose: Implements a gas pump program with:
+// - a GasPump object
+// - an interactive commandline interface via curses.h
 //
 #include "gas_pump.h"
 #include <curses.h>
@@ -23,20 +25,20 @@ int main() {
     // Setup gas prices (hardcoded)
     pump.addOption("Regular", 3.589);
     pump.addOption("Plus   ", 3.709);
-    pump.addOption("Diesel ", 3.959);
+    pump.addOption("Diesel ",  3.959);
 
     // Program config: pump rate + display rate hardcoded
     double pumpRate    = 1.0;      // Gal / sec
     double ticksPerSec = 10;
 
-    //
-    // Note: I started writing this using an enum class + nested switch statements,
-    // then realized it made much more sense to use goto and blocking input.
-    //
-    // Pump state is modeled as a FSM for obvious reasons; the gas pump API
-    // arose naturally / logically b/c of this
-    //
     setupDisplay();
+
+    // Note: gas pump state is modeled as a FSM for obvious reasons.
+    //
+    // While I started with an enum class + nested switch statements, I
+    // quickly realized that it made much more sense to just use goto
+    // (one of the few cases where goto is appropriate)
+    //
 idle:
     pump.displayWelcomeScreen();
     while (true) {

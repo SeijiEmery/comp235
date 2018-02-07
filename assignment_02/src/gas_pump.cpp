@@ -4,12 +4,13 @@
 // Compiler flags: 
 // https://github.com/SeijiEmery/comp235/tree/master/assignment_02
 //
-// Purpose: implements gas_pump.h
+// Purpose: implements the OOP gas pump interface in gas_pump.h
 //
 #include "gas_pump.h"
 #include <vector>
 #include <utility>
 #include <stdexcept>
+#include <cstdio>
 #include <curses.h>
 using namespace std;
 
@@ -71,8 +72,16 @@ void GasPump::printReceipt () const {
     enforce(impl->inTransaction, "No transaction!");
     enforce(!impl->isPumping, "Cannot print reciept while pumping!");
 
-    // Print stuff to a file reciept.txt
-    // Not implemented, whatever
+    auto file = fopen("receipt.txt", "w");
+    fprintf(file, "========================\n");
+    fprintf(file, "        Gas Mart        \n");
+    fprintf(file, "========================\n\n");
+
+    fprintf(file, "Fuel:     %s\n", get<0>(impl->gasOptions[impl->optionSelected - 1]).c_str());
+    fprintf(file, "Gal:      %.2lf\n", impl->gasPumped);
+    fprintf(file, "$/Gal:   $%.2lf\n", get<1>(impl->gasOptions[impl->optionSelected - 1]));
+    fprintf(file, "Charge:  $%.2lf\n", impl->gasPumped * get<1>(impl->gasOptions[impl->optionSelected - 1]));
+    fclose(file);
 }
 void GasPump::endTransaction () {
     enforce(impl->inTransaction, "Transaction not started!");
@@ -134,7 +143,7 @@ void GasPump::displaySummary () const {
 
     clear();
     printw("Finished pumping\n");
-    printw("Gallons: %.2lf\n");
-    printw("Charge: $%.2lf\n");
+    printw("Gallons: %.2lf\n", impl->gasPumped);
+    printw("Charge: $%.2lf\n", impl->gasPumped * get<1>(impl->gasOptions[impl->optionSelected - 1]));
     refresh();
 }
