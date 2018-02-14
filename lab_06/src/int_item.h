@@ -1,18 +1,15 @@
-/******************/
-/***   Header   ***/
-/******************/
-//intItemH.h
-//Miakhau, Chia
-//2/16/2017
-//MS Visual C++ 2017
+// File: int_item.h
+// Programmer: Seiji Emery
+// Compiler: Apple LLVM version 9.0.0 (clang-900.0.39.2)
+// Compiler Flags: -std=c++11
 //
-//Purpose, to overload:
+//Purpose: demonstrate overloading of
 //  Arihmetic operators
 //  stream I/O operators
 //  Comparison operators 
 
-#ifndef MCHIA_INTITEM
-#define MCHIA_INTITEM
+#ifndef __int_item_h__
+#define __int_item_h__
 #include <iostream>
  
 //Wrapper class for simple data type: int
@@ -31,4 +28,4 @@ public:
 private:
     int m_intNum = 0;
 };
-#endif
+#endif // __int_item_h__

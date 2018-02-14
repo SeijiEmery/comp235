@@ -1,15 +1,11 @@
-/******************/
-/***   Driver   ***/
-/******************/
-//driver.cpp
-//Miakhau, Chia
-//2/16/2017
-//MS Visual C++ 2017
-//File needed: intItem.h and intItem.cpp
+// File: driver.cpp
+// Programmer: Seiji Emery
+// Compiler: Apple LLVM version 9.0.0 (clang-900.0.39.2)
+// Compiler Flags: -std=c++11
 //
-//Purpose: To test operator overloaded in IntItem class
-//  from the intItem.h header file
-#include "intItemH.h"
+// Purpose: Test operator overloading in the IntItem class.
+//
+#include "int_item.h"
 #include <iostream>
 using namespace std;
 
