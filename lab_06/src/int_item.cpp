@@ -5,26 +5,7 @@
 //
 // Purpose: implement operator overloading in int_item.h
 
-#include "int_item.h"
-#include <iostream>
-using namespace std;
-
-/***** MEMBER FUNCIONS *****/
-bool IntItem::operator< (const IntItem& rhs) {
-    if (this->m_intNum < rhs.m_intNum)
-        return true;
-    else
-        return false;
-}
-
-/***** NON_MEMBER FUNCTIONS *****/
-ostream& operator<< (ostream& out, const IntItem& rhs)
-{
-    cout << rhs.m_intNum;
-    return out; //NOT *out
-}
-IntItem operator + (const IntItem& lhs, const IntItem& rhs) {
-    IntItem temp;
-    temp.m_intNum = lhs.m_intNum + rhs.m_intNum;
-    return temp;
-}
+// #include "int_item.h"
+// #include <iostream>
+// using namespace std;
+// Implementation is header only (b/c templates)
