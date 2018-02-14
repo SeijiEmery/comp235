@@ -13,6 +13,7 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+include_directories(..)
 add_executable(driver src/driver.cpp src/int_item.cpp)
 
 add_custom_target(run
