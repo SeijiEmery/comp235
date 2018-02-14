@@ -15,6 +15,13 @@
 #include <cstdlib>  // exit
 using namespace std;
 
+
+template <typename First, typename Second>
+std::ostream& operator<< (std::ostream& os, const std::pair<First, Second> pair) {
+    return os << "(" << pair.first << ", " << pair.second << ")";
+}
+
+
 int main()
 {
     IntItem myIntObj01{ 111 };
@@ -33,12 +40,10 @@ int main()
     // report() << "Got " << myIntObj01;
 
     std::vector<Boxed<int>> vec { 1, 2, 3, 4, 5, 6 };
-    report() << "[ " << join(", ", sequence(vec.begin(), vec.end())) << " ]";
-    report() << "[ " << join(", ", 
+    report() << writeAsList(sequence(vec.begin(), vec.end()));
+    report() << writeAsList(
         map([](const Boxed<int>& value) { return value * 2 + 1; },
-            sequence(vec.begin(), vec.end())
-        )
-    ) << " ]";
+            sequence(vec.begin(), vec.end())));
 
     std::unordered_map<std::string, Boxed<int>> values;
 
@@ -46,6 +51,7 @@ int main()
     SimpleRegexParser()
         .caseOf("quit", [&](Match match) { exit(0); })
         .caseOf("{} = {}", [&](Match match) {
+            info() << match[1].str() << " = " << match[2].str();
             values[match[1].str()] = atoi(match[2].str().c_str());
         })
         #define DO_BIN_OP(syntax, op) \
@@ -65,6 +71,18 @@ int main()
                     }\
                 }\
             })
+        .caseOf("dump", [&](Match match) {
+            report() << writeAsList(sequence(values.begin(), values.end()));
+        })
+        .caseOf("del {}", [&](Match match) {
+            auto it = values.find(match[1].str());
+            if (it != values.end()) {
+                info() << "del " << match[1].str();
+                values.erase(it);
+            } else {
+                warn() << "undefined: " << match[1].str();
+            }
+        })
         DO_BIN_OP("{} := {}", =)
         DO_BIN_OP("{} + {}", +)
         DO_BIN_OP("{} - {}", -)

@@ -17,3 +17,4 @@
 #include "reduce.hpp"
 #include "join.hpp"
 #include "take.hpp"
+#include "write_as_list.hpp"
