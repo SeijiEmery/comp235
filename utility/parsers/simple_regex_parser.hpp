@@ -108,7 +108,7 @@ private:
     }
     static std::string replace_group (std::string input) {
         static std::regex r { "\\{[^\\}]*\\}" };
-        return std::regex_replace(input, r, "(\\w+)");
+        return std::regex_replace(input, r, "([^\\s]+)");
     }
     static std::string escape_chars (std::string input) {
         static std::regex r { "([\\.\\+\\=\\[\\]\\(\\)\\-\\?\\:])" };
