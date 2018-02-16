@@ -30,7 +30,8 @@ public:
     friend int cmp (const Boxed<T>& a, const Boxed<T>& b) { return cmp(a.value(), b.value()); }
 
     #define IMPLEMENT_COMPARISON_OPERATOR(op) \
-    bool operator op (const Boxed<T>& rhs) { return cmp(*this, rhs) op 0; }
+    bool operator op (const Boxed<T>& rhs) { return cmp(*this, rhs) op 0; } \
+    bool operator op (const T& rhs)        { return value() op rhs; }
         IMPLEMENT_COMPARISON_OPERATOR(<)
         IMPLEMENT_COMPARISON_OPERATOR(>)
         IMPLEMENT_COMPARISON_OPERATOR(<=)
@@ -53,16 +54,29 @@ public:
     #define IMPLEMENT_MUTATING_OP(op) \
     Boxed<T>& operator op (const Boxed<T>& rhs) { \
         return this->value() op rhs.value(), *this; \
+    } \
+    Boxed<T>& operator op (const T& rhs) { \
+        return this->value() op rhs, *this; \
     }
 
     // Assignment operator
     IMPLEMENT_MUTATING_OP(=)
 
-    // Arithmetic operator
+    // Arithmetic operators
     IMPLEMENT_BINARY_OP(+) IMPLEMENT_MUTATING_OP(+=)
     IMPLEMENT_BINARY_OP(-) IMPLEMENT_MUTATING_OP(-=)
     IMPLEMENT_BINARY_OP(*) IMPLEMENT_MUTATING_OP(*=)
     IMPLEMENT_BINARY_OP(/) IMPLEMENT_MUTATING_OP(/=)
+
+    // Prefix increment + decrement
+    Boxed<T>& operator++ () { return *this += 1; }
+    Boxed<T>& operator-- () { return *this -= 1; }
+
+    // Postfix increment + decrement
+    // Note: the behavior of this is a bit wierd, which is why it's
+    // always better to do ++i (as a habit) instead of i++
+    Boxed<T> operator++ (int) { Boxed<T> copy { *this }; ++*this; return copy; }
+    Boxed<T> operator-- (int) { Boxed<T> copy { *this }; --*this; return copy; }
 
     #undef IMPLEMENT_MUTATING_OP
     #undef IMPLEMENT_BINARY_OP
