@@ -14,8 +14,11 @@ else()
 endif()
 
 include_directories(..)
-add_executable(lab src/lab.cpp)
-
-add_custom_target(run
-	COMMAND ./lab
-	DEPENDS lab)
+add_executable(lab7a src/lab7a.cpp)
+add_executable(lab7b src/lab7b.cpp)
+add_custom_target(run7a
+	COMMAND ./lab7a
+	DEPENDS lab7a)
+add_custom_target(run7b
+    COMMAND ./lab7b
+    DEPENDS lab7b)
