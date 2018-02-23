@@ -23,31 +23,22 @@ int main (int argc, const char** argv) {
         }
         str[0] += ((str[0] < 'a' || str[0] > 'z') ? 0 : 'A' - 'a');
 
-        // Process all other input as follows:
-        // - copy from input to output
-        // - capitalize the 1st letter of each sentence (1st non-space character after '.')
-        // - uncapitalize everything else
-        // - convert any / all sequences of 1+ spaces / tabs / newlines to a single space
-        // - I will _assume_ that there are no buffer overflows, as the length of output
-        //   should be <= input (we copy + remove / skip characters but do not add them;
-        //   input itself is limited to 100/99 characters by strncpy, though this hasn't
-        //   been tested)
-        // for (; *src; ++src, ++dst) {
-        //     switch (*src) {
-        //         case '.': case '!': case '?':
-        //             do { switch (*src) { case '.': case '!': case '?':
-        //                 *dst++ = *src++; continue; default:; }
-        //                 break; } while (1);
-        //             *dst++ = ' '; ++src;
-        //             while (*src == ' ' || *src == '\t' || *src == '\n') ++src;
-        //             *dst = *src + ((*src < 'a' || *src > 'z') ? 0 : 'A' - 'a');
-        //             break;
-        //         case ' ': case '\t': case '\n':
-        //             for (*dst = ' '; *src == ' ' || *src == '\t' || *src == '\n'; ++src); --src;
-        //             break;
-        //         default: *dst = *src + ((*src < 'A' || *src > 'Z') ? 0 : 'a' - 'A');
-        //     }
-        // }
+        size_t i = 0;
+        while (i < str.size()) {
+            // Find next space
+            i        = str.find_first_of(" \t\n", i);
+            size_t j = str.find_first_not_of(" \t\n", i);
+
+            info() << str;
+            warn() << i << ", " << j;
+            report() << str[i] << ", " << str[j];
+
+            if (std::max(i, j) < string::npos) {
+                str.erase(i + 1, j - i - 1);
+                str[i] = ' ';
+            }
+            i = j;
+        }
         info() << str;
     }
     return 0;
