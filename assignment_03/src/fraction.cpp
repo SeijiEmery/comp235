@@ -1,3 +1,9 @@
+// File: fraction.cpp
+// Name: Seiji Emery
+// Compiler: clang++
+// Compiler flags: -std=c++11
+// https://github.com/SeijiEmery/comp235/tree/master/assignment_03
+//
 #include <stdexcept>
 #include <vector>
 #include <string>
@@ -10,11 +16,6 @@ static unsigned gcd (unsigned a, unsigned b) {
     }
     return a;
 }
-// static unsigned abs (int a) {
-//     return a >= 0 ?
-//         static_cast<unsigned>(a) :
-//         static_cast<unsigned>(-a);
-// }
 static void reduceFraction (int& n, int& d) {
     unsigned num = abs(n), denom = abs(d), cf = gcd(num, denom);
     n = n * d >= 0 ?

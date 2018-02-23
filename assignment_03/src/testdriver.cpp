@@ -1,4 +1,9 @@
 // testdriver.cpp
+// name: Seiji Emery
+// compiler: clang++
+// compiler flags: -std=c++11
+// https://github.com/SeijiEmery/comp235/tree/master/assignment_03
+//
 // (provided by instructor)
 
 #include "fraction.h"

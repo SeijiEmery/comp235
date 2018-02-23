@@ -1,15 +1,11 @@
-
-
+// File: fraction.h
+// Name: Seiji Emery
+// Compiler: clang++
+// Compiler flags: -std=c++11
+// https://github.com/SeijiEmery/comp235/tree/master/assignment_03
+//
 #pragma once
 #include <iostream>
-
-
-// Primary constructor (from int values).
-// Note: this is the ONLY case where Fraction's internal state
-// will be potentially ill-formed: ie. denom < 0 or fraction not fully reduced
-// All other methods that modify or construct fraction state must pass n / d values 
-// through this constructor (except copy ctor), guaranteeing that Fraction state
-// always meets certain properties (ie. is fully reduced, etc...)
 
 class Fraction {
     int m_numerator   = 0;

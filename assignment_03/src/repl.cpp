@@ -1,10 +1,21 @@
+// File: fraction.h
+// Name: Seiji Emery
+// Compiler: clang++
+// Compiler flags: -std=c++17
+// https://github.com/SeijiEmery/comp235/tree/master/assignment_03
+//
+// Implements a full-fledged (sortof) repl / interpreter for fraction.h,
+// with infix syntax, variable assignment, and support for all basic operators
+// (+, -, *, /, ==, !=, >=, <=, >, <)
+//
+
 #include "fraction.h"
 #include <iostream>
 #include <vector>
 #include <utility>
 #include <regex>
 #include <cassert>
-#include <variant>
+#include <variant>  // requires c++17
 #include <map>
 #include "utility/util/lineio.hpp"
 using namespace std;
