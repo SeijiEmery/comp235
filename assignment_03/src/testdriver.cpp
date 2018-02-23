@@ -1,73 +1,93 @@
 // testdriver.cpp
 // (provided by instructor)
-//
-// Demo a string stream to extract user input
-// and store TWO values, the numerator and
-// denominator (even from a mixed number)
-//
-// ASSUMPTION 1: Acceptable user input format, 
-//  no spaces between each token.
-//  For examples:
-//  1. a mixed number: 1+2/3
-//  2. a simple fraction: 1/3
-//  3. an integer value instead: 1234
-// ASSUMPTION 2: Othere input formats are 
-//  not handled in the code below
-// ASSUMPTION 3:  A mixed number input will
-//  converted and saved as two values, its
-//  corresponding numerator and denominator
 
-#include <sstream>
-#include <iostream>
+#include "fraction.h"
+#include <iostream> 
 using namespace std;
 
-int main()
-{
-    string str = "";
-    char plusSign = ' ';
-    char forwardSlash = ' ';
+int main() {
+    Fraction f1;
+    Fraction f2;
+    cout << "TEST 1: >> operator" << endl;
+    cout << "Enter the first fraction: ";
+    cin >> f1;
+    cout << "Enter the second fraction: ";
+    cin >> f2;
+    cout << "\n\nTEST 2: << operator, reduced forms" << endl;
+    cout << "f1 = " << f1 << endl;
+    cout << "f2 = " << f2 << endl;
 
-    cout << "Enter a fraction:\t";
-    cin >> str;
+    // Arithmetic Operations
+    cout << "\n\nTEST 3: +, -, *, /" << endl;
+    cout << "f1 + f2 = " << f1 + f2 << endl;
+    cout << "f1 - f2 = " << f1 - f2 << endl;
+    cout << "f1 * f1 = " << f1 * f2 << endl;
+    cout << "f1 / f1 = " << f1 / f2 << endl;
 
-    stringstream ss(str);
+    // Preincrement
+    cout << "\n\nTEST 4: Preincrement operator" << endl;
+    cout << "(++f1) + f2 = " << (++f1) + f2 << endl;
+    cout << "(++f1) - f2 = " << (++f1) - f2 << endl;
+    cout << "(++f1) * f2 = " << (++f1) * f2 << endl;
+    cout << "(++f1) / f2 = " << (++f1) / f2 << endl;
 
-    int wholeNum = 0;
-    int numerator = 0;
-    int denominator = 1;
+    // Postincrement
+    cout << "\n\nTEST 5: Postincrement operator" << endl;
+    cout << "(f1++) + f2 = " << (f1++) + f2 << endl;
+    cout << "(f1++) - f2 = " << (f1++) - f2 << endl;
+    cout << "(f1++) * f2 = " << (f1++) * f2 << endl;
+    cout << "(f1++) / f2 = " << (f1++) / f2 << endl;
 
-    ss >> wholeNum; //assumes mixed number
-    if (!ss.eof())
-    {
-        if (ss.peek() == '/')
-        { //Not mixed number
+    // Predecrement
+    cout << "\n\nTEST 6: Predecrement operator" << endl;
+    cout << "(--f1) + f2 = " << (--f1) + f2 << endl;
+    cout << "(--f1) - f2 = " << (--f1) - f2 << endl;
+    cout << "(--f1) * f2 = " << (--f1) * f2 << endl;
+    cout << "(--f1) / f2 = " << (--f1) / f2 << endl;
 
-            numerator = wholeNum;
-            wholeNum = 0;
-            //Read off the forward slash
-            ss >> forwardSlash;
-            ss >> denominator;
-        }
-        else if (ss.peek() == '+')
-        { //Must be a mixed number
+    // Postdecrement
+    cout << "\n\nTEST 7: Postdecrement operator" << endl;
+    cout << "(f1--) + f2 = " << (f1--) + f2 << endl;
+    cout << "(f1--) - f2 = " << (f1--) - f2 << endl;
+    cout << "(f1--) * f2 = " << (f1--) * f2 << endl;
+    cout << "(f1--) / f2 = " << (f1--) / f2 << endl;
+    cout << "\n\nTEST 8: Augmented arithmetic operators" << endl;
+    cout << "\n\nValues of fractions BEFORE testing augmented operators:" << endl;
+    cout << "f1 = " << f1 << endl;
+    cout << "f2 = " << f2 << endl;
+    cout << "\nThese statements are executed..." << endl;
+    cout << "f1 += 1;\nf2 -= f1;\nf1 *= 3;\nf2 /= 2; " << endl;
 
-            //Read off the plus sign
-            ss >> plusSign;
-            ss >> numerator;
-            ss >> forwardSlash;
-            ss >> denominator;
-        }
-    }
+    // Augmented assignments
+    f1 += 1;
+    f2 -= f1;
+    f1 *= 3;
+    f2 /= 2;
+    cout << "\nValues of fractions AFTER testing augmented operators..." << endl;
+    cout << "f1 = " << f1 << endl;
+    cout << "f2 = " << f2 << endl;
+    cout << "\n\nTEST 9: ==, >, <, >=, <=, !=" << endl;
 
-    //Assume you want to store two values only
-    // -- the numerator and the denominator
-    numerator = numerator + wholeNum * denominator;
-    wholeNum = 0;
-    cout << "Whole number = " << wholeNum << endl;
-    cout << "Numerator = "   << numerator << endl;
-    cout << "Denominator = " << denominator << endl;
-
-
-    cout << endl;
+    // Relational operators
+    if (f1 == f2) cout << "f1 == f2 tested true." << endl;
+    else cout << "f1 == f2 tested false." << endl;
+    if (f1 > f2) cout << "f1 > f2 tested true." << endl;
+    else cout << "f1 > f2 tested false." << endl;
+    if (f1 < f2) cout << "f1 < f2 tested true." << endl;
+    else
+        cout << "f1 < f2 tested false." << endl;
+    cout << "\nThis statement is executed..." << endl;
+    cout << "f1 = f2; " << endl;
+    f1 = f2;
+    if (f1 >= f2) cout << "f1 >= f2 tested true." << endl;
+    else
+        cout << "f1 >= f2 tested false." << endl;
+    cout << "\nThis statement is executed..." << endl;
+    cout << "f1 -= 1;" << endl;
+    f1 -= 1;
+    if (f1 <= f2) cout << "f1 <= f2 tesed true." << endl;
+    else cout << "f1 <= f2 tesed false." << endl;
+    if (f1 != f2) cout << "f1 != f2 tested true." << endl;
+    else cout << "f1 != f2 tested false." << endl;
     return 0;
 }

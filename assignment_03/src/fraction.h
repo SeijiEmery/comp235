@@ -51,6 +51,13 @@ public:
     Fraction& operator*= (const Fraction& other) { return *this = (*this * other); }
     Fraction& operator/= (const Fraction& other) { return *this = (*this / other); }
 
+    // Increment & decrement
+    Fraction& operator++ () { return (*this) += { 1 }; }
+    Fraction& operator-- () { return (*this) -= { 1 }; }
+    Fraction  operator++ (int _) { auto copy { *this }; (*this) += { 1 }; return copy; }
+    Fraction  operator-- (int _) { auto copy { *this }; (*this) -= { 1 }; return copy; }
+
+
     // Conversion operators (implicitely convert to double)
     operator double () const { 
         return static_cast<double>(m_numerator) / static_cast<double>(m_denominator); 

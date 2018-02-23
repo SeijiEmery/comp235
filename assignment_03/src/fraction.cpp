@@ -54,82 +54,20 @@ static void enforce (bool cond, const char* msg) {
         throw std::runtime_error(msg);
     }
 }
-
-enum OP { 
-    NONE   = 0, 
-    PLUS   = 0x11, MINUS  = 0x12, 
-    MUL    = 0x23, DIV    = 0x24, 
-    LPAREN = 0x35, RPAREN = 0x36,
-    PRECEDENCE = 0xF0,
-};
-static int maybeReadOp (std::istream& is) {
-    switch (is.get()) {
-        case '+': return PLUS;
-        case '-': return PLUS;
-        case '*': return PLUS;
-        case '/': return PLUS;
-        case '(': return LPAREN;
-        case ')': return RPAREN;
-        default:  is.unget(); return NONE;
-    }
-}
-static void reduce1 (std::vector<Fraction>& values, std::vector<int>& ops) {
-    enforce(values.size() >= 2, "No value(s), syntax error");
-    auto rhs = values.back(); values.pop_back();
-    switch (ops.back()) {
-        case PLUS:  std::cout << values.back() << " += " << rhs << '\n'; values.back() += rhs; break;
-        case MINUS: std::cout << values.back() << " -= " << rhs << '\n'; values.back() -= rhs; break;
-        case MUL:   std::cout << values.back() << " *= " << rhs << '\n'; values.back() *= rhs; break;
-        case DIV:   std::cout << values.back() << " /= " << rhs << '\n'; values.back() /= rhs; break;
-        default: enforce(0, "INVALID OPERATOR");
-    }
-    ops.pop_back();
-}
-static Fraction parseFractionExpr (std::istream& is) {
-    std::vector<Fraction> values;
-    std::vector<int>      ops;
-
-    while (is.good()) {
-        if (!skipWhitespace(is)) break;
-        auto op = maybeReadOp(is);
-        switch (op) {
-            case NONE: {
-                int value;
-                enforce(parseInt(is, value), "Expected number");
-                std::cout << "GOT " << value << '\n';
-                values.push_back(value);
-            } break;
-            case PLUS: case MINUS: case MUL: case DIV:
-                std::cout << "OPERATOR " << (is.unget(), is.get()) << '\n';
-                while ((ops.back() & PRECEDENCE) >= (op & PRECEDENCE)
-                    && ops.back() != LPAREN
-                ) {
-                    reduce1(values, ops);
-                }
-                ops.push_back(op);
-                break;
-            case LPAREN:
-                std::cout << "(\n";
-                ops.push_back(op);
-                break;
-            case RPAREN:
-                std::cout << ")\n";
-                while (ops.back() != LPAREN) {
-                    reduce1(values, ops);
-                }
-                enforce(ops.back() == '(', "Expected LPAREN");
-                ops.pop_back();
-                break;
-            default: assert(0);
-        }
-    }
-    while (ops.size()) {
-        reduce1(values, ops);
-    }
-    // enforce(values.size() == 1, "Mismatched values / ops...");
-    return values.back();
-}
-
 std::istream& operator>> (std::istream& is, Fraction& value) {
-    return value = parseFractionExpr(is), is;
+    int first = 0, second = 0, third = 1;
+    is >> first;
+    if (!is.eof()) {
+        switch (is.get()) {
+            case '+': is >> second; break;
+            case '-': is.unget(); is >> second; break;
+            case '/': is.unget(); std::swap(first, second); break;
+        }
+        switch (is.get()) {
+            case '/': is >> third; break;
+            default:  is.unget();
+        }
+        value = { first * third + second, third };
+    }
+    return is;
 }
