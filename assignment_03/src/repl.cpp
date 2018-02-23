@@ -9,6 +9,33 @@
 #include "utility/util/lineio.hpp"
 using namespace std;
 
+// Note: this program is hacks upon hacks upon hacks
+// – RegexMatcher is nice-ish, but probably not great performance wise
+// - Token is actually well engineered
+// - RTokenizer works decently well but is very basic
+// - RInfixTokenizer is a hack at the _lexer_ level to transform infix expressions into postfix ones
+//   Note: it defines operator precedence but does NOT use it
+// - parsePostfix is a dcently good postfix parser, but is jury rigged to also parse infix via the above
+// - oh, and it uses that precedence hack (parentheses) instead of actually implementing
+//   the shunting yard algorithm or a TDOP, etc. TLDR; parser is extremely shitty
+// - variables + variable assignment is a hack; realized at this point that my shit parser
+//   made even syntax like "let <name> = <expr>" not work trivially (since we're converting to postfix, lol),
+//   and the token range concept doesn't have any easy way to unget tokens...
+// - so I basically just turned it into / admitted that it's a LL(0) parser and will just support
+//   really simple syntax like "let <name> <expr>".
+// - oh, I'm also using exceptions to bail (ie. throw EmptyEval()), and JUST to avoid printing
+//   empty values, etc...
+// - comparison is also an ugly hack (ofc), and doesn't actually return / create a real value (since
+//   I only support Fraction, basically no variadic support currently / planned).
+// - comparison *literally* doesn't do what you think (probably):
+//      - I added another layer to the ugly nested parentheses precedence hack b/c otherwise behavior would break
+//      - when the parser finds a comparison, it just checks both sides (which have been evaluated, hopefully)
+//      - *PRINTS* the value (note: never really exists in memory)
+//      - and then CRASHES / throws an exception b/c otherwise we'd print stuff...
+//        (though it's a "harmless" exception used only for control flow... >.>)
+//  - oh, and did I mention that I'm doing the precedence hack with 5-6 sequential regex replaces on
+// a std::string? If this weren't so basic it'd be incredibly slow
+
 template <typename T>
 class RegexMatcher {
     typedef std::regex                          Regex;
@@ -124,7 +151,8 @@ public:
     }
 };
 
-// Special "error" values
+// Special "error" values (we're, erm, throwing these to make special state 
+// changes and skip normal REPL code in some cases... >.>)
 struct EmptyEval   {};  // nothing evalutated (empty line)
 struct QuitCommand {};  // user entered "quit"
 
@@ -241,7 +269,7 @@ Fraction parsePostfix (Tok tok, map<string, Fraction>& dict) {
                         if (tok->name() == "on")  { info() << "token logging enabled!"; g_debugTokens = true;  throw EmptyEval(); }
                         if (tok->name() == "off") { info() << "token logging disabled!"; g_debugTokens = false; throw EmptyEval(); }
                     }
-                    warn() << "expected 'debug (on | off)', not '" << *tok << "'\n";
+                    warn() << "expected 'debug (on | off)', not '" << *tok << "'";
                     throw std::runtime_error("syntax error");
                 } else if (tok->name() == "let") {
                     while ((++tok)->type() == TOKEN_WHITESPACE) {}
@@ -251,7 +279,23 @@ Fraction parsePostfix (Tok tok, map<string, Fraction>& dict) {
                         if (tok->type() == TOKEN_OPERATOR && tok->op() == "=") { ++tok; }
                         return dict[name] = parsePostfix(tok, dict);
                     }
-                    warn() << "expected 'let <name> = <expression>', not '" << *tok << "'\n";
+                    warn() << "expected 'let <name> = <expression>', not '" << *tok << "'";
+                    throw std::runtime_error("syntax error");
+                } else if (tok->name() == "del") {
+                    while ((++tok)->type() == TOKEN_WHITESPACE) {}
+                    if (tok->type() == TOKEN_NAME) {
+                        auto name = tok->name();
+                        auto it = dict.find(name);
+                        if (it != dict.end()) {
+                            dict.erase(it);
+                            info() << "deleted '" << name << "'";
+                            throw EmptyEval();
+                        } else {
+                            warn() << "undefined: '" << name << "'";
+                            throw EmptyEval();
+                        }
+                    }
+                    warn() << "expected 'del <name>', not '" << *tok << "'";
                     throw std::runtime_error("syntax error");
                 } else {
                     auto it = dict.find(tok->name());
@@ -342,8 +386,11 @@ int main () {
         } catch (EmptyEval _) {
             // Nothing evaluated, ignore
         } catch (QuitCommand _) {
+            // Quit command
+            info() << "exiting...";
             return 0;
         } catch (std::runtime_error error) {
+            // Syntax error (usually)
             warn() << error.what();
         }
     }

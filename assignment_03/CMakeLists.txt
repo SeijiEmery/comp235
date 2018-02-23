@@ -21,7 +21,7 @@ else()
 endif()
 
 include_directories(..)
-add_executable(fraction src/driver.cpp src/fraction.cpp)
+add_executable(repl src/repl.cpp src/fraction.cpp)
 add_custom_target(run
-	COMMAND ./fraction
-	DEPENDS fraction)
+	COMMAND ./repl
+	DEPENDS repl)
