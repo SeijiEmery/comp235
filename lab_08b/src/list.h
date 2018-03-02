@@ -5,14 +5,14 @@ class List
 public:
     List();
     List(int);
-    /*List(const List&);*/
+    List(const List&);
 
     void addItem(int newItem);
     void printList();
     void decrementAll();
 
-    /*List& operator= (const List&);*/
-    /*~List();*/
+    List& operator= (const List&);
+    ~List();
 private:
     int *dataList;
     int length;

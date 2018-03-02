@@ -1,10 +1,10 @@
 /*** Implementations ***/
 #include "list.h"
 #include <iostream>
+#include <algorithm> // std::swap, etc
 using namespace std;
 
-List::List()
-{
+List::List() {
     dataList = new int[10];
     length = 0;
     capacity = 10;
@@ -16,11 +16,13 @@ List::List(int p_cap)
     length = 0;
     capacity = p_cap;
 }
-//List::List(const List& p_obj)
-//{
-//  //Allocate separate memory
-//  //Copy over attriutes of p_obj 
-//}
+List::List(const List& other)
+    : dataList(new int [other.capacity])
+    , length (other.length)
+    , capacity (other.capacity)
+{
+    std::copy(other.dataList, &other.dataList[other.length], dataList);
+}
 
 void List::addItem(int newItem)
 {
@@ -41,13 +43,17 @@ void List::decrementAll()
         dataList[i]--;
 }
 
-//List& List::operator= (const List&)
-//{
-//  //Allocate separate memory
-//  //Copy over attriutes of p_obj 
-//}
+List& List::operator= (const List& other) {
+    List copy { other };
+    std::swap(dataList, copy.dataList);
+    std::swap(length, copy.length);
+    std::swap(capacity, copy.capacity);
+    return *this;
+}
 
-//List::~List()
-//{
-//  //Deallocate dynamic array
-//}
+List::~List()
+{
+    if (dataList) {
+        delete[] dataList;
+    }
+}
