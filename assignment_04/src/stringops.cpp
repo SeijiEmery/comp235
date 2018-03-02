@@ -65,16 +65,17 @@ static int parseHex (const char*& str) { return parseBase(str, 16, parseHexDigit
 static int parseBin (const char*& str) { return parseBase(str, 2,  parseBinaryDigit); }
 
 int parseInt (const char*& str) {
+    const char* begin = str;
     int sign = 1;
     if (*str == '-')      ++str, sign = -1;
     else if (*str == '+') ++str, sign = 1;
-    if (str[0] == '0' && str[1] == 'x') {
+    if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
         return sign * parseHex(str += 2);
-    } else if (str[0] == '0' && str[1] == 'b') {
+    } else if (str[0] == '0' && (str[1] == 'b' || str[1] == 'B')) {
         return sign * parseBin(str += 2);
-    } else if (str[0] < '0' || str[0] > '9') {
-        return -((1 << 31) - 1);
-    } else {
+    } else if (str[0] >= '0' && str[0] <= '9') {
         return sign * parseDec(str);
+    } else {
+        return str = begin, -((1 << 31) - 1);
     }
 }
