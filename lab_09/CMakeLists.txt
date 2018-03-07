@@ -18,3 +18,7 @@ add_executable(driver src/driver.cpp src/f.cpp src/g.cpp src/user.cpp src/passwo
 add_custom_target(run
 	COMMAND ./driver
 	DEPENDS driver)
+
+add_custom_target(testinput
+    COMMAND cat ../testinput.txt | ./driver
+    DEPENDS driver)
