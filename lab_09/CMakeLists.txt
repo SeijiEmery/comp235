@@ -14,7 +14,7 @@ else()
 endif()
 
 include_directories(..)
-add_executable(driver src/driver.cpp src/f.cpp src/g.cpp)
+add_executable(driver src/driver.cpp src/f.cpp src/g.cpp src/user.cpp src/password.cpp)
 add_custom_target(run
 	COMMAND ./driver
 	DEPENDS driver)
