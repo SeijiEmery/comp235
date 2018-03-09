@@ -5,6 +5,37 @@ using namespace std;
 
 #define ENFORCE(cond) \
     if (!(cond)) { throw std::runtime_error("enforce() failure: " __FILE__ ": " + __LINE__); }
+
+bool seekTo (std::fstream &file, std::string search) {
+    std::string line; size_t offset = 0;
+    file.seekp(0, std::ios::beg);
+    while (std::getline(file, line)) {
+        auto loc = line.find(search);
+        if (loc != std::string::npos) {
+            file.seekp(offset + loc + search.size(), std::ios::beg);
+            return true;
+        }
+        offset += line.size();
+    }
+    return false;
+
+    // std::cout << file.tellg() << ", " << file.tellp() << '\n';
+
+    // char c;
+    // while (file.good() && (file >> c, c) != search[0]) {
+    //     for (size_t i = 1; i < search.size(); ++i) {
+    //         if (!file.good()) return false;
+    //         if ((file >> c, c) != search[i]) goto retry;
+    //     }
+    //     std::cout << file.tellg() << ", " << file.tellp() << '\n';
+    //     file.seekp(file.tellg(), std::ios::beg);
+    //     // file.seekp(file.tellg(), std::ios::beg);
+    //     return true;
+    // retry:;
+    // }
+    // return false;
+}
+
  
 int main (int argc, const char** argv) {
     std::cout << argv[0] << '\n';
@@ -40,7 +71,7 @@ int main (int argc, const char** argv) {
         file << "black truffles#$230.99\n";
         file << "angus beef#$88.23\n";
 
-        file.seekp(33, std::ios::beg);
+        ENFORCE(seekTo(file, "black truffles#$"));
         file << "330.50";
 
         std::cout << '\n';
@@ -52,7 +83,7 @@ int main (int argc, const char** argv) {
         while (std::getline(file, line)) {
             std::cout << line << '\n';
         }
-    
+
 
         // int i = 0;
         // while (file.good()) {
