@@ -1,13 +1,25 @@
+// File: recursion.cpp
+// Name: Seiji Emery
+// Compiler: gcc, apple llvm 9.0.0
+// Compiler flags: -std=c++11
+// https://github.com/SeijiEmery/comp235/tree/master/lab_11
+//
 #include <iostream>
 #include <cassert>
 using namespace std;
 
+// Returns the sum of the decimal digits in an integer.
+// ie. sumOfDigits(12345) = 1 + 2 + 3 + 4 + 5 = 15
 int sumOfDigits(long n) 
 {
     if (n == 0) { return 0; }
     else { return n % 10 + sumOfDigits(n / 10); }
 }
 
+// Prints an "hour glass" shape indicating recursion
+// 1) prints n asterisks
+// 2) recursively prints using halfHourGlass(n - 1)
+// 3) prints n asterisks (if n > 1)
 void halfHourGlass(int n)
 {
     for (auto i = n; i --> 0; ) { std::cout << '*'; } std::cout << '\n';
@@ -17,7 +29,8 @@ void halfHourGlass(int n)
     }
 }
 
-//Find array of positive numbers
+// Returns the maximum value in an array of integers.
+// Assumes array size >= 1
 int findMax(int arr[], int arrSize)
 {
     assert(arrSize > 0);
@@ -29,7 +42,8 @@ int findMax(int arr[], int arrSize)
     }
 }
 
-//Assume array size is at least 1
+// Returns the index of the smallest element in the array.
+// Assumes array size >= 1
 int findMinIndex(int arr[], int arrSize)
 {
     assert(arrSize > 0);
@@ -41,34 +55,48 @@ int findMinIndex(int arr[], int arrSize)
     }
 }
 
-void displayArray (int array[], int size) {
-    for (int i = 0; i < size; ++i) {
-        std::cout << array[i] << ' ';
+// Helper function for displayArray
+void _displayArray (int array[], int size) {
+    if (size > 0) {
+        _displayArray(array, size - 1);
+        std::cout << array[size - 1] << ' ';
     }
+}
+
+// Prints an array (in order).
+// Assumes array size >= 1
+void displayArray (int array[], int size) {
+    assert(size > 0);
+    _displayArray(array, size);
     std::cout << "\b\n";
 }
 
-bool bubbleSortElement (int arr[], int arrSize) {
+
+// helper function for bubbleSort
+bool bubbleSortOnce (int arr[], int arrSize) {
     if (arrSize < 2) return false;
-    bool didSwap = bubbleSortElement(arr, arrSize - 1);
+    bool didSwap = bubbleSortOnce(arr, arrSize - 1);
     if (arr[arrSize - 1] < arr[arrSize - 2]) {
-        std::cout << "SWAP " << (arrSize - 1) << ", " << (arrSize - 2) << '\n';
-        displayArray(arr, arrSize);
+        // std::cout << "SWAP " << (arrSize - 1) << ", " << (arrSize - 2) << '\n';
+        // displayArray(arr, arrSize);
         std::swap(arr[arrSize - 1], arr[arrSize - 2]);
-        displayArray(arr, arrSize);
+        // displayArray(arr, arrSize);
         return true;
     }
     return didSwap;
 }
 
+// Recursive bubblesort.
+// works by recursively sorting one "strand" (using bubbleSortOnce)
+// until no swaps have been made / array is sorted
 void bubbleSort(int arr[], int arrSize)
 {
-    if (arrSize > 0 && bubbleSortElement(arr, arrSize)) {
-        std::cout << "STILL NOT SORTED\n";
-        displayArray(arr, arrSize);
+    if (arrSize > 0 && bubbleSortOnce(arr, arrSize)) {
+        // std::cout << "STILL NOT SORTED\n";
+        // displayArray(arr, arrSize);
         bubbleSort(arr, arrSize);
     } else {
-        std::cout << "SORTED\n";
+        // std::cout << "SORTED\n";
     }
 }
 
@@ -85,6 +113,5 @@ int main()
     cout << "Sorting...\n";
     bubbleSort(myArr, SIZE);
     displayArray(myArr, SIZE);
-
     return 0;
 }
