@@ -5,6 +5,7 @@
 // https://github.com/SeijiEmery/comp235/tree/master/lab_11
 //
 #include <iostream>
+#include <algorithm>
 #include <cassert>
 using namespace std;
 
@@ -16,16 +17,23 @@ int sumOfDigits(long n)
     else { return n % 10 + sumOfDigits(n / 10); }
 }
 
+void writeNChars (char c, int n) {
+    if (n > 0) {
+        std::cout << c;
+        writeNChars(c, n - 1);
+    }
+}
+
 // Prints an "hour glass" shape indicating recursion
 // 1) prints n asterisks
 // 2) recursively prints using halfHourGlass(n - 1)
 // 3) prints n asterisks (if n > 1)
 void halfHourGlass(int n)
 {
-    for (auto i = n; i --> 0; ) { std::cout << '*'; } std::cout << '\n';
+    writeNChars('*', n); std::cout << '\n';
     if (n > 1) {
         halfHourGlass(n - 1);
-        for (auto i = n; i --> 0; ) { std::cout << '*'; } std::cout << '\n';
+        writeNChars('*', n); std::cout << '\n';
     }
 }
 
@@ -94,7 +102,7 @@ void bubbleSort(int arr[], int arrSize)
     if (arrSize > 0 && bubbleSortOnce(arr, arrSize)) {
         // std::cout << "STILL NOT SORTED\n";
         // displayArray(arr, arrSize);
-        bubbleSort(arr, arrSize);
+        bubbleSort(arr, arrSize - 1);
     } else {
         // std::cout << "SORTED\n";
     }
