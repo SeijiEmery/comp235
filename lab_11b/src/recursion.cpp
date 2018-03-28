@@ -61,6 +61,24 @@ std::ostream& operator << (std::ostream& os, const int (&array)[N]) {
     return os;
 }
 
+//
+// 2nd exercise
+//
+
+bool even (size_t n);
+bool odd  (size_t n) { return !even(n); }
+bool even (size_t n) { return n == 0 || odd(n - 1); }
+
+void testEvenOdd () {}
+
+template <typename... Args>
+void testEvenOdd (size_t n, Args... rest) {
+    std::cout << n << " is " << 
+        (even(n) ? "even" : "odd") << '\n';
+    testEvenOdd(rest...);
+}
+
+
 int main()
 {
 
@@ -68,5 +86,7 @@ int main()
     cout << "Initial array: " << array << '\n';
     insertionSort(array);
     cout << "After sorted:  " << array << '\n';
+
+    testEvenOdd(0, 1, 2, 3, 4, 5, 23);
     return 0;
 }
