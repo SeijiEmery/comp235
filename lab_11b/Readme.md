@@ -1,11 +1,11 @@
-# Lab 11: recursion
+# Lab 11b: recursion
 
-Demonstrates recursion w/ some very simple examples
+More recusion
 
 # Build instructions (\*nix)
     cd <some-temp-dir>
     git clone https://github.com/SeijiEmery/comp235
-    cd comp235/lab_11/
+    cd comp235/lab_11b/
     mkdir build; cd build
     cmake ..
     make run

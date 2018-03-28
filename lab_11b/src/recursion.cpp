@@ -2,24 +2,12 @@
 // Name: Seiji Emery
 // Compiler: gcc, apple llvm 9.0.0
 // Compiler flags: -std=c++11
-// https://github.com/SeijiEmery/comp235/tree/master/lab_11
+// https://github.com/SeijiEmery/comp235/tree/master/lab_11b
 //
 #include <iostream>
 #include <algorithm>
 #include <cassert>
 using namespace std;
-
-
-// template <typename Iterator>
-// void insertionSort (Interator begin, Iterator end) {
-//     if (begin == end) return;
-//     for (auto it = begin; ++it != end; ) {
-//         if (*it < *begin) {
-//             std::swap(*it, *begin);
-//         }
-//     }
-//     insertionSort(begin + 1, end);
-// }
 
 //
 // Exercise 1: insertion sort
@@ -78,6 +66,17 @@ void testEvenOdd (size_t n, Args... rest) {
     testEvenOdd(rest...);
 }
 
+void hanoi (int n, int start, int target, int temp) {
+    if (n > 0) {
+        hanoi(n - 1, start, temp, target);
+        std::cout << "Move disk " << n << " from " << start << " to " << target << '\n';
+        hanoi(n - 1, temp, target, start);
+    }
+}
+void hanoi (int n) {
+    std::cout << "Hanoi (" << n << ")\n";
+    hanoi(n, 1, 2, 3);
+}
 
 int main()
 {
@@ -88,5 +87,8 @@ int main()
     cout << "After sorted:  " << array << '\n';
 
     testEvenOdd(0, 1, 2, 3, 4, 5, 23);
+
+    hanoi(2);
+    hanoi(3);
     return 0;
 }
