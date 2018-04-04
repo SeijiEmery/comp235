@@ -1,33 +1,82 @@
 #include <iostream>
 using namespace std;
 
-bool checkForWin (int guess, int answer)
-{
-    if (answer == guess)
-    {
-        cout << "You're right! You win!" << endl;
-        return true;
-    }
-    else if (answer < guess)
-        cout << "Your guess is too high." << endl;
-    else
-        cout << "your guess is too low." << endl;
-    return false;
-}
-void play (Player &player1, Player &player2)
-{
-    int answer = 0, guess = 0;
-    answer = rand( ) % 100;
-    bool win = false;
-    while (!win)
-    {
-        cout << "Player 1's turn to guess." << endl;
-        guess = player1.getGuess( );
-        win = checkForWin(guess, answer);
-        if (win) return;
+enum class Comparison { EQUAL = 0, GREATER = 1, LESSER = -1 };
 
-        cout << "Player 2's turn to guess." << endl;
-        guess = player2.getGuess( );
-        win = checkForWin(guess, answer);
+class IPlayer {
+public:
+    virtual const char* name () const = 0;
+    virtual int  getGuess    () = 0;
+    virtual void reportGuess (int guess, Comparison cmp) {}
+};
+
+bool checkForWin (IPlayer& player, IPlayer& secondPlayer, int playerId, int answer) {
+    int guess = player.getGuess();
+    cout << player.name() << " player " << playerId << " guessed " << guess << ", ";
+    if (guess == answer) {
+        cout << player.name() << " player " << playerId << " has won!\n";
+        return true;
+    } else {
+        cout << "guess was " << (guess > answer ? "too high" : "too low") << '\n';
+        player.reportGuess(guess, guess > answer ? Comparison::LESSER : Comparison::GREATER);
+        secondPlayer.reportGuess(guess, guess > answer ? Comparison::LESSER : Comparison::GREATER);
+        return false;
     }
+}
+
+void play (IPlayer &player1, IPlayer &player2) {
+    cout << "\nStarting game with players " << player1.name() << ", " << player2.name() << "\n";
+    int answer = 0, guess = 0;
+    answer = rand() % 100;
+    while (!checkForWin(player1, player2, 1, answer) && !checkForWin(player2, player1, 2, answer));
+}
+template <typename P1, typename P2>
+void playWith () {
+    P1 player1;
+    P2 player2;
+    play(static_cast<IPlayer&>(player1), static_cast<IPlayer&>(player2));
+}
+
+
+class RandomPlayer : public IPlayer {
+public:
+    const char* name () const override { return "Random"; }
+    int getGuess () override { return rand() % 100; }
+    void reportGuess (int guess, Comparison cmp) override {}
+};
+
+class HumanPlayer : public IPlayer {
+public:
+    const char* name () const override { return "Human"; }
+    int getGuess () override {
+        cout << "guess = ";
+        int guess = 0;
+        cin >> guess;
+        return guess;
+    }
+};
+
+class ComputerPlayer : public IPlayer {
+    int lowBound = 0, upBound = 100;
+public:
+    const char* name () const override { return "Computer"; }
+    int getGuess () override { return rand() % (upBound - lowBound) + lowBound; }
+    void reportGuess (int guess, Comparison cmp) override {
+        switch (cmp) {
+            case Comparison::GREATER: lowBound = guess + 1; break;
+            case Comparison::LESSER:  upBound  = guess - 1; break;
+            default:;
+        }
+    }
+};
+
+
+int main () {
+    srand(time(nullptr));
+    playWith<ComputerPlayer, HumanPlayer>();
+
+    playWith<HumanPlayer, HumanPlayer>();
+    playWith<HumanPlayer, RandomPlayer>();
+    playWith<RandomPlayer, RandomPlayer>();
+    return 0;
 }
