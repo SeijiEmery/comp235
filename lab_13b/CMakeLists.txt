@@ -19,7 +19,7 @@ add_custom_target(part1
 	COMMAND ./p1
 	DEPENDS p1)
 
-add_executable(p1 src/part2.cpp)
+add_executable(p2 src/part2.cpp)
 add_custom_target(part2
     COMMAND ./p2
     DEPENDS p2)

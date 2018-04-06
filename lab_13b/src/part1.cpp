@@ -1,6 +1,8 @@
 #include <iostream>
 using namespace std;
 
+// Note: I DID NOT WRITE OR DESIGN THIS CODE!!!!
+
 class GameParkAnimal {
 public:
     GameParkAnimal(string food = "") : foodType(food) {}
@@ -27,7 +29,12 @@ class PolarBear : public GameParkAnimal { public:
 };
 void dailyConsumption(GameParkAnimal* arr[], size_t arrSize, int& chkn, int& fish, int&rabbit)
 {
-//TO DO : Use dynamic casting, identify animal types and increment counts of // ‘chkn’, ‘fish’, and ‘rabbit’ with appropriate amounts
+    for (size_t i = arrSize; i --> 0; ) {
+        if (auto ptr = dynamic_cast<Tiger*>(arr[i])) { rabbit += ptr->getDailyAmount(); }
+        else if (auto ptr = dynamic_cast<Fox*>(arr[i])) { chkn += ptr->getDailyAmount(); }
+        else if (auto ptr = dynamic_cast<PolarBear*>(arr[i])) { fish += ptr->getDailyAmount(); }
+        else { assert(0); }
+    }
 }
 int main() {
     //Do not change anything in the driver
