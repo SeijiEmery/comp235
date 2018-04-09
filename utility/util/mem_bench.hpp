@@ -19,6 +19,7 @@
 
 #ifndef NO_MEM_DEBUG
 #include <chrono>
+#include <iostream>
 
 struct MemTracer {
     void traceAlloc (size_t bytes) { ++numAllocations; allocatedMem += bytes; }
@@ -39,6 +40,10 @@ public:
         std::cout << "Freed memory: "   << ((double)freedMem)     * 1e-6 << " MB (" << numFrees       << " deallocations)\n";
         std::cout << "Ran in " << duration_cast<duration<double>>(t1 - t0).count() * 1e3 << " ms\n";
     }
+    size_t memAllocated   () const { return allocatedMem; }
+    size_t memDeallocated () const { return freedMem; }
+    size_t allocCount     () const { return numAllocations; }
+    size_t deallocCount   () const { return numFrees; }
 } g_memTracer;
 
 void* operator new (size_t size) throw(std::bad_alloc) {

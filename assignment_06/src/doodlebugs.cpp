@@ -2,7 +2,8 @@
 #include <vector>
 #include <array>
 #include <cassert>
-
+#include <chrono>
+#include "utility/util/mem_bench.hpp"
 
 #if 0
 struct ScopeDebugger {
@@ -340,18 +341,6 @@ public:
                 os << '\n';
             }
         }
-        os << '\n';
-        // os << "ant(s): ";
-        // for (auto& organism : cells) {
-        //     if (organism && organism->isAnt()) {
-        //         os  
-        //             << static_cast<void*>(organism) << " "
-        //             << organism->pos() << " (" 
-        //             << organism->pos() % width << ", "
-        //             << organism->pos() / width << "); ";
-        //     }
-        // }
-        // os << "\b\b\n";
     }
 };
 
@@ -380,6 +369,18 @@ void Doodlebug::move (Simulation& simulation) {
     }
 }
 
+struct Bytes {
+    size_t value;
+    Bytes (size_t value) : value(value) {}
+    friend std::ostream& operator<< (std::ostream& os, const Bytes& bytes) {
+        if (bytes.value <= 1000)                    { return os << bytes.value << "byte(s)"; }
+        else if (bytes.value <= 1000 * 1000)        { return os << static_cast<double>(bytes.value) * 1e-3 << " kb"; }
+        else if (bytes.value <= 1000 * 1000 * 1000) { return os << static_cast<double>(bytes.value) * 1e-6 << " mb"; }
+        else                                        { return os << static_cast<double>(bytes.value) * 1e-9 << " gb"; }
+    }
+};
+Bytes bytes (size_t value) { return { value }; }
+
 void clearScreen () {}
 
 int main () {
@@ -406,15 +407,34 @@ int main () {
     assert(!simulation.bounded(simulation.size()));
     assert(simulation.size() == width * height);
 
+    std::chrono::high_resolution_clock::time_point t0, t1;
+
+    using namespace std::chrono;
+    double simulationTime = 0;
+    double displayTime    = 0;
+    double ioTime         = 0;
+
     size_t step  = 0;
     while (true) {
-        clearScreen();
-        std::cout << "Running simulation: "
-            << "step = " << step++ << ", "
-            << simulation.numAnts() << " ant(s), "
-            << simulation.numBugs() << " bug(s), "
-            << "pop load = " << simulation.popLoad() << '\n';
-        simulation.display(std::cout);
+        {
+            auto t0 = high_resolution_clock::now();
+            clearScreen();
+            std::cout << "Running simulation: "
+                << "step = " << step++ << ", "
+                << simulation.numAnts() << " ant(s), "
+                << simulation.numBugs() << " bug(s), "
+                << "pop load = " << simulation.popLoad() << '\n';
+            std::cout 
+                << "simulation: " << simulationTime << " ms, " 
+                << "display: " << displayTime << " ms, "
+                << "i/o: " << ioTime << " ms, "
+                << "\nmemory alloc / freed: " 
+                    << bytes(g_memTracer.memAllocated()) << " / " << bytes(g_memTracer.memDeallocated())
+                    << " (" << g_memTracer.allocCount() << " / " << g_memTracer.deallocCount() << ")\n";
+            simulation.display(std::cout);
+            auto t1 = high_resolution_clock::now();
+            displayTime = duration_cast<duration<double>>(t1 - t0).count() * 1e3;
+        }
 
         // // Early exit conditions
         // if (simulation.popLoad() == 0) {
@@ -426,12 +446,23 @@ int main () {
         //     return 2;
         // }
 
-        std::cout << "[ waiting for input, enter to continue, 'q' to exit ]\n";
-        char input = getchar();
+        char input;
+        {
+            auto t0 = high_resolution_clock::now();
+            std::cout << "[ waiting for input, enter to continue, 'q' to exit ]\n";
+            input = getchar(); 
+            auto t1 = high_resolution_clock::now();
+            ioTime = duration_cast<duration<double>>(t1 - t0).count() * 1e3;
+        }
+
+        
         if (input == 'q' || input == 'Q') {
             return 0;
         } else {
+            auto t0 = high_resolution_clock::now();
             simulation.simulate();
+            auto t1 = high_resolution_clock::now();
+            simulationTime = duration_cast<duration<double>>(t1 - t0).count() * 1e3;
         }
     }
     return -1;
