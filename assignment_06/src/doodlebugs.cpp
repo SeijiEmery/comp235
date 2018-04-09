@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <chrono>
+#include <fstream>
 #include "utility/util/mem_bench.hpp"
 
 #if 0
@@ -336,7 +337,7 @@ public:
             assert(bounded(i));
             auto& organism = cell(i);
             os << (organism == nullptr ? ' ' : 
-                organism->isAnt() ? 'X' : 'O');
+                !organism->isAnt() ? 'X' : 'O');
             if (((i + 1) % width) == 0) {
                 os << '\n';
             }
@@ -381,17 +382,44 @@ struct Bytes {
 };
 Bytes bytes (size_t value) { return { value }; }
 
+
+struct Seconds {
+    double value;
+    Seconds (double value = 0.0) : value(value) {}
+    friend std::ostream& operator<< (std::ostream& os, const Seconds& seconds) {
+        if (seconds.value >= 1.0) { return os << seconds.value << "sec"; }
+        else if (seconds.value >= 1e-3) { return os << seconds.value * 1e3 << " ms"; }
+        else if (seconds.value >= 1e-6) { return os << seconds.value * 1e6 << " µs"; }
+        else                            { return os << seconds.value * 1e9 << " ns"; }
+    }
+};
+
+struct Timer {
+    double& value;
+    std::chrono::high_resolution_clock::time_point t0;
+
+    Timer  (double& value) 
+        : value(value), 
+        t0(std::chrono::high_resolution_clock::now()) 
+    {}
+    ~Timer () { 
+        using namespace std::chrono;
+        auto t1 = high_resolution_clock::now();
+        value = duration_cast<duration<double>>(t1 - t0).count();
+    }
+};
+
 void clearScreen () {}
 
 int main () {
     DEBUG_SCOPE("int main()")
     srand(time(nullptr));
-    size_t width = 150, height = 60;
+    size_t width = 204, height = 63;
     Simulation simulation { width, height };
     // simulation.spawnDoodlebugs(5);
     // simulation.spawnAnts(100);
-    simulation.spawnAnts(200);
-    simulation.spawnDoodlebugs(100);
+    simulation.spawnAnts(500);
+    simulation.spawnDoodlebugs(250);
 
     std::cout << "Random direction iterator samples:\n";
     for (auto i = 10; i --> 0; ) {
@@ -410,59 +438,60 @@ int main () {
     std::chrono::high_resolution_clock::time_point t0, t1;
 
     using namespace std::chrono;
-    double simulationTime = 0;
-    double displayTime    = 0;
-    double ioTime         = 0;
+    Seconds simulationTime;
+    Seconds displayTime;
+    Seconds ioTime;
+
+    std::ofstream summary { "log.csv" };
+    summary
+        << "step, "
+        << "%% ants, "
+        << "%% bugs, "
+        << "simulation time (s), "
+        << "display time (s), "
+        << "user input time (s)\n";
 
     size_t step  = 0;
     while (true) {
         {
-            auto t0 = high_resolution_clock::now();
+            Timer t (displayTime.value);
             clearScreen();
             std::cout << "Running simulation: "
                 << "step = " << step++ << ", "
                 << simulation.numAnts() << " ant(s), "
                 << simulation.numBugs() << " bug(s), "
-                << "pop load = " << simulation.popLoad() << '\n';
-            std::cout 
-                << "simulation: " << simulationTime << " ms, " 
-                << "display: " << displayTime << " ms, "
-                << "i/o: " << ioTime << " ms, "
+                << "pop load = " << simulation.popLoad() << '\n'
+                << "simulation: " << simulationTime << ", " 
+                << "display: " << displayTime << ", "
+                << "i/o: " << ioTime << ", "
                 << "\nmemory alloc / freed: " 
                     << bytes(g_memTracer.memAllocated()) << " / " << bytes(g_memTracer.memDeallocated())
                     << " (" << g_memTracer.allocCount() << " / " << g_memTracer.deallocCount() << ")\n";
-            simulation.display(std::cout);
-            auto t1 = high_resolution_clock::now();
-            displayTime = duration_cast<duration<double>>(t1 - t0).count() * 1e3;
-        }
 
-        // // Early exit conditions
-        // if (simulation.popLoad() == 0) {
-        //     std::cout << "Ending simulation, no life remaining\n";
-        //     return 1;
-        // } 
-        // if (simulation.numBugs() == 0 && simulation.popLoad() > 0.7) {
-        //     std::cout << "Ending simulation, no doodlebugs left\n";
-        //     return 2;
-        // }
+            simulation.display(std::cout);
+        }
+        {
+            summary 
+                << step << ", "
+                << ((double)simulation.numAnts() / (double)simulation.size()) << ", "
+                << ((double)simulation.numBugs() / (double)simulation.size()) << ", "
+                << simulationTime.value << ", "
+                << displayTime.value << ", "
+                << ioTime.value << '\n';
+        }
 
         char input;
         {
-            auto t0 = high_resolution_clock::now();
+            Timer t (ioTime.value);
             std::cout << "[ waiting for input, enter to continue, 'q' to exit ]\n";
             input = getchar(); 
-            auto t1 = high_resolution_clock::now();
-            ioTime = duration_cast<duration<double>>(t1 - t0).count() * 1e3;
         }
-
         
         if (input == 'q' || input == 'Q') {
             return 0;
         } else {
-            auto t0 = high_resolution_clock::now();
+            Timer t (simulationTime.value);
             simulation.simulate();
-            auto t1 = high_resolution_clock::now();
-            simulationTime = duration_cast<duration<double>>(t1 - t0).count() * 1e3;
         }
     }
     return -1;
