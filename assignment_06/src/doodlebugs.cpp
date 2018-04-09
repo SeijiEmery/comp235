@@ -174,7 +174,7 @@ public:
     bool canMove (size_t pos, size_t target) {
         return bounded(target)
             && (abs((int)pos - (int)target) > 1 ||
-                (pos / height) == (target / height));
+               (pos / height) == (target / height));
     }
 
     bool move (size_t pos) {
@@ -324,11 +324,22 @@ public:
             auto& organism = cell(i);
             os << (organism == nullptr ? ' ' : 
                 organism->isAnt() ? 'X' : 'O');
-            if ((i % width) == 0) {
+            if (((i + 1) % width) == 0) {
                 os << '\n';
             }
         }
         os << '\n';
+        os << "ant(s): ";
+        for (auto& organism : cells) {
+            if (organism && organism->isAnt()) {
+                os  
+                    << static_cast<void*>(organism) << " "
+                    << organism->pos() << " (" 
+                    << organism->pos() % width << ", "
+                    << organism->pos() / width << "); ";
+            }
+        }
+        os << "\b\b\n";
     }
 };
 
@@ -337,7 +348,7 @@ void Ant::move (Simulation& simulation) {
     assert(simulation.cell(position) == static_cast<Organism*>(this));
     simulation.move(position);
     if ((++lifetime % 3) == 0) {
-        simulation.spawnAnt(position);
+        // simulation.spawnAnt(position);
     }
 }
 
@@ -362,11 +373,11 @@ void clearScreen () {}
 int main () {
     DEBUG_SCOPE("int main()")
     srand(time(nullptr));
-    size_t width = 8, height = 2;
+    size_t width = 8, height = 8;
     Simulation simulation { width, height };
     // simulation.spawnDoodlebugs(5);
     // simulation.spawnAnts(100);
-    simulation.spawnAnts(1);
+    simulation.spawnAnts(4);
 
     std::cout << "Random direction iterator samples:\n";
     for (auto i = 10; i --> 0; ) {
@@ -392,15 +403,15 @@ int main () {
             << "pop load = " << simulation.popLoad() << '\n';
         simulation.display(std::cout);
 
-        // Early exit conditions
-        if (simulation.popLoad() == 0) {
-            std::cout << "Ending simulation, no life remaining\n";
-            return 1;
-        } 
-        if (simulation.numBugs() == 0 && simulation.popLoad() > 0.7) {
-            std::cout << "Ending simulation, no doodlebugs left\n";
-            return 2;
-        }
+        // // Early exit conditions
+        // if (simulation.popLoad() == 0) {
+        //     std::cout << "Ending simulation, no life remaining\n";
+        //     return 1;
+        // } 
+        // if (simulation.numBugs() == 0 && simulation.popLoad() > 0.7) {
+        //     std::cout << "Ending simulation, no doodlebugs left\n";
+        //     return 2;
+        // }
 
         std::cout << "[ waiting for input, enter to continue, 'q' to exit ]\n";
         char input = getchar();
