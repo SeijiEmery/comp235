@@ -173,9 +173,10 @@ public:
     RandomArrayIterable<int, 4> randomizedDirections () { return { directions }; }
 
     bool canMove (size_t pos, size_t target) {
-        return bounded(target)
-            && (abs((int)pos - (int)target) > 1 ||
-               (pos / height) == (target / height));
+        if (!bounded(target)) return false; // must be bounded
+        int dx = (pos % width) - (target % width);
+        int dy = (pos / width) - (target / width);
+        return (dx == 0) != (dy == 0); // can move along x axis or y axis but not both
     }
 
     bool move (size_t pos) {
@@ -340,17 +341,17 @@ public:
             }
         }
         os << '\n';
-        os << "ant(s): ";
-        for (auto& organism : cells) {
-            if (organism && organism->isAnt()) {
-                os  
-                    << static_cast<void*>(organism) << " "
-                    << organism->pos() << " (" 
-                    << organism->pos() % width << ", "
-                    << organism->pos() / width << "); ";
-            }
-        }
-        os << "\b\b\n";
+        // os << "ant(s): ";
+        // for (auto& organism : cells) {
+        //     if (organism && organism->isAnt()) {
+        //         os  
+        //             << static_cast<void*>(organism) << " "
+        //             << organism->pos() << " (" 
+        //             << organism->pos() % width << ", "
+        //             << organism->pos() / width << "); ";
+        //     }
+        // }
+        // os << "\b\b\n";
     }
 };
 
@@ -359,7 +360,7 @@ void Ant::move (Simulation& simulation) {
     assert(simulation.cell(position) == static_cast<Organism*>(this));
     simulation.move(position);
     if ((++lifetime % 3) == 0) {
-        // simulation.spawnAnt(position);
+        simulation.spawnAnt(position);
     }
 }
 
@@ -369,14 +370,14 @@ void Doodlebug::move (Simulation& simulation) {
     if (simulation.eat(position)) {
         timeSinceLastMeal = 0;
     } else {
-    //     simulation.move(position);
+        simulation.move(position);
     }
-    // if ((++lifetime % 8) == 0) {
-    //     simulation.spawnDoodlebug(position);
-    // }
-    // if (++timeSinceLastMeal > 3) {
-    //     simulation.kill(position);
-    // }
+    if ((++lifetime % 8) == 0) {
+        simulation.spawnDoodlebug(position);
+    }
+    if (++timeSinceLastMeal > 3) {
+        simulation.kill(position);
+    }
 }
 
 void clearScreen () {}
@@ -384,12 +385,12 @@ void clearScreen () {}
 int main () {
     DEBUG_SCOPE("int main()")
     srand(time(nullptr));
-    size_t width = 40, height = 20;
+    size_t width = 150, height = 60;
     Simulation simulation { width, height };
     // simulation.spawnDoodlebugs(5);
     // simulation.spawnAnts(100);
-    simulation.spawnAnts(100);
-    simulation.spawnDoodlebugs(5);
+    simulation.spawnAnts(200);
+    simulation.spawnDoodlebugs(100);
 
     std::cout << "Random direction iterator samples:\n";
     for (auto i = 10; i --> 0; ) {
