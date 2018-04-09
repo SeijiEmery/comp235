@@ -53,6 +53,7 @@ protected:
     size_t position = 0;
     size_t lifetime = 0;
 public:
+    bool   dead     = false;
     IMPLEMENT_CTORS(Organism)
     Organism (size_t position) : position(position) {}
     virtual ~Organism () {}
@@ -201,6 +202,8 @@ public:
     bool kill (size_t pos) {
         DEBUG_SCOPE("Simulation::kill(size_t)")
         assert(bounded(pos));
+        assert(cell(pos) != nullptr);
+        assert(cell(pos)->pos() == pos);
         if (Organism*& organism = cell(pos)) {
             if (organism->isAnt()) {
                 assert(antPopulation > 0);
@@ -209,8 +212,9 @@ public:
                 assert(doodlebugPopulation > 0);
                 --doodlebugPopulation;
             }
-            delete organism;
+            organism->dead = true;
             organism = nullptr;
+            assert(cell(pos) == nullptr);
             return true;
         } else return false;
     }
@@ -314,7 +318,14 @@ public:
             }
         }
         for (auto& organism : organisms) {
-            organism->move(*this);
+            if (!organism->dead) {
+                organism->move(*this);
+            }
+        }
+        for (auto& organism : organisms) {
+            if (organism->dead) {
+                delete organism;
+            }
         }
     }
     void display (std::ostream& os) {
@@ -353,13 +364,13 @@ void Ant::move (Simulation& simulation) {
 }
 
 void Doodlebug::move (Simulation& simulation) {
-    // DEBUG_SCOPE("Doodlebug::move()");
-    // assert(simulation.cell(position) == static_cast<Organism*>(this));
-    // if (simulation.eat(position)) {
-    //     timeSinceLastMeal = 0;
-    // } else {
+    DEBUG_SCOPE("Doodlebug::move()");
+    assert(simulation.cell(position) == static_cast<Organism*>(this));
+    if (simulation.eat(position)) {
+        timeSinceLastMeal = 0;
+    } else {
     //     simulation.move(position);
-    // }
+    }
     // if ((++lifetime % 8) == 0) {
     //     simulation.spawnDoodlebug(position);
     // }
@@ -373,11 +384,12 @@ void clearScreen () {}
 int main () {
     DEBUG_SCOPE("int main()")
     srand(time(nullptr));
-    size_t width = 8, height = 8;
+    size_t width = 40, height = 20;
     Simulation simulation { width, height };
     // simulation.spawnDoodlebugs(5);
     // simulation.spawnAnts(100);
-    simulation.spawnAnts(4);
+    simulation.spawnAnts(100);
+    simulation.spawnDoodlebugs(5);
 
     std::cout << "Random direction iterator samples:\n";
     for (auto i = 10; i --> 0; ) {
