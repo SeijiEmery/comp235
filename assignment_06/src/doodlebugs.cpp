@@ -1,6 +1,37 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <cassert>
+
+
+#if 0
+struct ScopeDebugger {
+    const char* msg;
+    static int  indent;
+
+    static std::ostream& writeln (std::ostream& os = std::cout) {
+        os << '\n';
+        for (int i = indent; i --> 0; ) {
+            os << "| ";
+        }
+        return os;
+    }
+
+    ScopeDebugger (const char* msg) : msg(msg) {
+        writeln() << msg << " begin"; ++indent;
+    }
+    ~ScopeDebugger () { 
+        --indent;
+        writeln() << msg << " end";
+    }
+};
+int ScopeDebugger::indent = 0;
+#define DEBUG_SCOPE(msg) ScopeDebugger debug ## __COUNTER__ (msg);
+#define DEBUG_ONE(msg)   ScopeDebugger::writeln() << msg;
+#else
+#define DEBUG_SCOPE(msg)
+#define DEBUG_ONE(msg)
+#endif
 
 class Simulation;
 
@@ -29,16 +60,17 @@ public:
     virtual bool isAnt () const = 0;
     virtual void move (Simulation&) = 0;
 
-    void setPos (size_t pos) { position = pos; }
+    void setPos (size_t pos) { DEBUG_ONE("Organism::setPos()") position = pos; }
+    size_t pos () const { return position; }
 };
 
 class Ant : public Organism {
 public:
     IMPLEMENT_CTORS(Ant)
-    Ant (size_t position) : Organism(position) {}
-    ~Ant () {}
+    Ant (size_t position) : Organism(position) { DEBUG_ONE("Ant()"); }
+    ~Ant () { DEBUG_ONE("~Ant()");}
 
-    bool isAnt () const override { return true; }
+    bool isAnt () const override { DEBUG_ONE("Ant::isAnt()") return true; }
     void move (Simulation&) override;
 };
 
@@ -46,10 +78,10 @@ class Doodlebug : public Organism {
     size_t timeSinceLastMeal = 0;
 public:
     IMPLEMENT_CTORS(Doodlebug)
-    Doodlebug (size_t position) : Organism(position) {}
-    ~Doodlebug () {}
+    Doodlebug (size_t position) : Organism(position) { DEBUG_ONE("Doodlebug()"); }
+    ~Doodlebug () { DEBUG_ONE("~Doodlebug()"); }
 
-    bool isAnt () const override { return false; }
+    bool isAnt () const override { DEBUG_ONE("Doodlebug::isAnt()") return false; }
     void move (Simulation&) override;
 };
 
@@ -65,7 +97,7 @@ public:
     IMPLEMENT_CTORS(Simulation)
     Simulation (size_t width, size_t height) 
         : width(width), height(height),
-        cells((width) * (height), nullptr),
+        cells(width * height, nullptr),
         directions { -1, +1, -(int)width, +(int)width }
     {}
     size_t size () const { return width * height; }
@@ -85,12 +117,15 @@ public:
     bool move (size_t pos, size_t target) {
         if (bounded(target)) {
             assert(bounded(pos));
-            Organism*& from = cell(pos);
-            Organism*& to   = cell(target);
+            assert(cell(pos) != nullptr && cell(target) == nullptr);
+            assert(cell(pos)->pos() == pos);
 
-            assert(from != nullptr && to == nullptr);
-            from->setPos(pos);
-            std::swap(from, to);
+            std::swap(cell(pos), cell(target));
+            cell(target)->setPos(target);
+
+            assert(cell(pos) == nullptr);
+            assert(cell(target) != nullptr);
+            assert(cell(target)->pos() == target);
             return true;
         } else return false;
     }
@@ -136,19 +171,35 @@ protected:
 public:
     RandomArrayIterable<int, 4> randomizedDirections () { return { directions }; }
 
+    bool canMove (size_t pos, size_t target) {
+        return bounded(target)
+            && (abs((int)pos - (int)target) > 1 ||
+                (pos / height) == (target / height));
+    }
+
     bool move (size_t pos) {
+        DEBUG_SCOPE("Simulation::move(size_t)")
+        Organism* organism = cell(pos);
+        assert(organism->pos() == pos);
         for (int dir : randomizedDirections()) {
             size_t target = static_cast<size_t>(static_cast<int>(pos) + dir);
             // std::cout << pos / height << ", " << target / height << '\n';
-            if (bounded(target) 
-                && (pos / height) == (target / height)
-                && cell(target) == nullptr && move(pos, target)) {
+            if (canMove(pos, target)
+                && cell(target) == nullptr 
+                && move(pos, target)
+            ) {
+                assert(organism->pos() == target);
+                assert(cell(pos)    == nullptr);
+                assert(cell(target) == organism);
                 return true;
             }
         }
+        assert(organism->pos() == pos);
+        assert(cell(pos) == organism);
         return false;
     }
     bool kill (size_t pos) {
+        DEBUG_SCOPE("Simulation::kill(size_t)")
         assert(bounded(pos));
         if (Organism*& organism = cell(pos)) {
             if (organism->isAnt()) {
@@ -164,15 +215,16 @@ public:
         } else return false;
     }
     bool eat (size_t pos) {
+        DEBUG_SCOPE("Simulation::eat(size_t)")
         assert(bounded(pos));
         for (int dir : randomizedDirections()) {
             size_t target = static_cast<size_t>(static_cast<int>(pos) + dir);
-            if (!bounded(target)) {
-                continue;
-            }
-            Organism*& organism = cell(target);
-            if (organism && organism->isAnt()) {
-                bool ok = kill(target) && move(pos, target);
+            if (canMove(pos, target)
+                && cell(target) != nullptr
+                && cell(target)->isAnt()
+            ) {
+                bool ok = kill(target) 
+                       && move(pos, target);
                 assert(ok);
                 return true;
             }
@@ -180,16 +232,22 @@ public:
         return false;
     }
     size_t findSpawnLocation (size_t pos) {
+        DEBUG_SCOPE("Simulation::findSpawnLocation(size_t)")
         assert(bounded(pos));
         for (auto dir : directions) {
             size_t target = static_cast<size_t>(static_cast<int>(pos) + dir);
-            if (cell(target) == nullptr) {
+            if (canMove(pos, target)
+                && cell(target) == nullptr
+            ) {
                 return target;
             }
         }
         return size();
     }
     bool spawnAnt (size_t pos) {
+        DEBUG_SCOPE("Simulation::spawnAnt(size_t)")
+
+        assert(cell(pos) && cell(pos)->isAnt());
         pos = findSpawnLocation(pos);
         if (bounded(pos)) {
             assert(cell(pos) == nullptr);
@@ -199,6 +257,8 @@ public:
         } else return false;
     }
     bool spawnDoodlebug (size_t pos) {
+        DEBUG_SCOPE("Simulation::spawnDoodlebug(size_t)")
+        assert(cell(pos) && !cell(pos)->isAnt());
         pos = findSpawnLocation(pos);
         if (bounded(pos)) {
             assert(cell(pos) == nullptr);
@@ -210,6 +270,7 @@ public:
 private:
     template <typename T>
     void spawn () {
+        DEBUG_SCOPE("Simulation::spawn<T>()")
         assert(popLoad() < 0.7);
         while (1) {
             size_t pos = static_cast<size_t>(rand()) % size();
@@ -220,13 +281,32 @@ private:
         }
     }
 public:
-    void spawnAnt       () { spawn<Ant>();       ++antPopulation; }
-    void spawnDoodlebug () { spawn<Doodlebug>(); ++doodlebugPopulation; }
+    void spawnAnt () { 
+        DEBUG_SCOPE("Simulation::spawnAnt()")  
+        spawn<Ant>();      
+        ++antPopulation; 
+    }
+    void spawnDoodlebug () { 
+        DEBUG_SCOPE("Simulation::spawnDoodlebug()")
+        spawn<Doodlebug>(); 
+        ++doodlebugPopulation; 
+    }
 
-    void spawnAnts       (size_t n) { while (n --> 0) { spawnAnt(); } }
-    void spawnDoodlebugs (size_t n) { while (n --> 0) { spawnDoodlebug(); } }
+    void spawnAnts (size_t n) { 
+        DEBUG_SCOPE("Simulation::spawnAnts()")
+        while (n --> 0) { 
+            spawnAnt(); 
+        } 
+    }
+    void spawnDoodlebugs (size_t n) { 
+        DEBUG_SCOPE("Simulation::spawnDoodlebugs()")
+        while (n --> 0) { 
+            spawnDoodlebug(); 
+        } 
+    }
 
     void simulate () {
+        DEBUG_SCOPE("Simulation::simulate()")
         organisms.clear();
         for (auto& organism : cells) {
             if (organism != nullptr) {
@@ -238,6 +318,7 @@ public:
         }
     }
     void display (std::ostream& os) {
+        DEBUG_SCOPE("Simulation::display()")
         for (size_t i = 0; i < size(); ++i) {
             assert(bounded(i));
             auto& organism = cell(i);
@@ -247,10 +328,13 @@ public:
                 os << '\n';
             }
         }
+        os << '\n';
     }
 };
 
 void Ant::move (Simulation& simulation) {
+    DEBUG_SCOPE("Ant::move()");
+    assert(simulation.cell(position) == static_cast<Organism*>(this));
     simulation.move(position);
     if ((++lifetime % 3) == 0) {
         simulation.spawnAnt(position);
@@ -258,25 +342,31 @@ void Ant::move (Simulation& simulation) {
 }
 
 void Doodlebug::move (Simulation& simulation) {
-    if (simulation.eat(position)) {
-        timeSinceLastMeal = 0;
-    } else {
-        simulation.move(position);
-    }
-    if ((++lifetime % 8) == 0) {
-        simulation.spawnDoodlebug(position);
-    }
-    if (++timeSinceLastMeal > 3) {
-        simulation.kill(position);
-    }
+    // DEBUG_SCOPE("Doodlebug::move()");
+    // assert(simulation.cell(position) == static_cast<Organism*>(this));
+    // if (simulation.eat(position)) {
+    //     timeSinceLastMeal = 0;
+    // } else {
+    //     simulation.move(position);
+    // }
+    // if ((++lifetime % 8) == 0) {
+    //     simulation.spawnDoodlebug(position);
+    // }
+    // if (++timeSinceLastMeal > 3) {
+    //     simulation.kill(position);
+    // }
 }
 
 void clearScreen () {}
 
 int main () {
-    Simulation simulation { 20, 20 };
-    simulation.spawnDoodlebugs(5);
-    simulation.spawnAnts(100);
+    DEBUG_SCOPE("int main()")
+    srand(time(nullptr));
+    size_t width = 8, height = 2;
+    Simulation simulation { width, height };
+    // simulation.spawnDoodlebugs(5);
+    // simulation.spawnAnts(100);
+    simulation.spawnAnts(1);
 
     std::cout << "Random direction iterator samples:\n";
     for (auto i = 10; i --> 0; ) {
@@ -290,9 +380,7 @@ int main () {
     assert(simulation.bounded(0));
     assert(simulation.bounded(simulation.size() - 1));
     assert(!simulation.bounded(simulation.size()));
-    assert(simulation.size() == 400);
-
-
+    assert(simulation.size() == width * height);
 
     size_t step  = 0;
     while (true) {
@@ -314,13 +402,13 @@ int main () {
             return 2;
         }
 
-        // std::cout << "[ waiting for input, enter to continue, 'q' to exit ]\n";
-        // char input = getchar();
-        // if (input == 'q' || input == 'Q') {
-        //     return 0;
-        // } else {
+        std::cout << "[ waiting for input, enter to continue, 'q' to exit ]\n";
+        char input = getchar();
+        if (input == 'q' || input == 'Q') {
+            return 0;
+        } else {
             simulation.simulate();
-        // }
+        }
     }
     return -1;
 }
