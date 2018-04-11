@@ -22,9 +22,12 @@ endif()
 
 include_directories(..)
 
-
-
 add_executable(doodlebugs src/doodlebugs.cpp)
 add_custom_target(run
     COMMAND ./doodlebugs
     DEPENDS doodlebugs)
+
+add_executable(optimized src/optimized.cpp)
+add_custom_target(run_optimized
+    COMMAND ./optimized
+    DEPENDS optimized)
