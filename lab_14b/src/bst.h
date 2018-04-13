@@ -4,8 +4,8 @@ template <class T>
 class BST {
 public:
     BST ();
-    void insert (T new_item);
-    void delete (T delete_me);
+    void insert (T value);
+    void remove (T value);
 
     /*** Tree traversals ***/
     void inOrder ();
@@ -14,9 +14,9 @@ public:
 private:
     struct Node {
         T data;
-        Node* llink = nullptr;
-        Node* rlink = nullptr;
+        Node* left = nullptr;
+        Node* right = nullptr;
     };
-    Node* m_root = nullptr;
+    Node* root = nullptr;
     //Helper functions
 };
