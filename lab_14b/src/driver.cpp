@@ -1,18 +1,23 @@
 #include <iostream>
-#include "bst.h"
+// #include "bst.h"
+#include "bst.hpp"
 #include "utility/util/mem_bench.hpp"
+#include "utility/util/lineio.hpp"
 using namespace std;
+
+template <typename T>
+void insert (BST<T>& tree, const std::initializer_list<T>& values) {
+    for (auto value : values) {
+        info() << "inserting " << value << " into " << tree;
+        tree.insert(value);
+        info() << "\b => " << tree;
+    }
+}
+
 
 int main () {
     BST<int> myIntBST;
-    myIntBST.insert(5); myIntBST.preOrder();
-    myIntBST.insert(3); myIntBST.preOrder();
-    myIntBST.insert(7); myIntBST.preOrder();
-    myIntBST.insert(1); myIntBST.preOrder();
-    myIntBST.insert(4); myIntBST.preOrder();
-    myIntBST.insert(6); myIntBST.preOrder();
-    myIntBST.insert(8); myIntBST.preOrder();
-    myIntBST.insert(2); myIntBST.preOrder();
+    insert(myIntBST, { 5, 3, 7, 1, 4, 6, 8, 2 });
     cout << "TEST 1: Integer Tree...\n";
     myIntBST.inOrder();
     myIntBST.preOrder();
