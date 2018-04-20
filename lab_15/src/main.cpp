@@ -83,8 +83,10 @@ public:
     This& operator= (const This&) = default;
 
     value operator* () const { return *it; }
-    This& operator++ ()    { return --it, *this; }
-    This& operator++ (int) { This copy { *this }; return ++(*this), copy; }
+    This& operator++ ()      { return --it, *this; }
+    This& operator-- ()      { return ++it, *this; }
+    This& operator++ (int)   { This copy { *this }; return --(*this), copy; }
+    This& operator-- (int)   { This copy { *this }; return ++(*this), copy; }
     friend bool operator== (const This& a, const This& b) {
         return a.it == b.it;
     }
@@ -204,11 +206,21 @@ class Reversal {
     Seq& seq;
 public:
     Reversal (Seq& seq) : seq(seq) {}
-    auto begin () -> decltype(seq.rbegin()) { return seq.rbegin(); }
-    auto end   () -> decltype(seq.rend())   { return seq.rend();   }
+    auto begin  () -> decltype(seq.rbegin()) { return seq.rbegin(); }
+    auto end    () -> decltype(seq.rend())   { return seq.rend();   }
+    auto rbegin () -> decltype(seq.begin())  { return seq.begin();  }
+    auto rend   () -> decltype(seq.end())    { return seq.end();    }
+
+    auto begin  () const -> decltype(seq.rbegin()) { return seq.rbegin(); }
+    auto end    () const -> decltype(seq.rend())   { return seq.rend();   }
+    auto rbegin () const -> decltype(seq.begin())  { return seq.begin();  }
+    auto rend   () const -> decltype(seq.end())    { return seq.end();    }
 };
 template <typename Seq>
 auto reversed (Seq& seq) -> Reversal<Seq> { return { seq }; }
+
+template <typename Seq>
+auto reversed (const Seq& seq) -> Reversal<const Seq> { return { seq }; }
 
 int main()
 {
@@ -224,11 +236,11 @@ int main()
             cin.get(next);
         }
         cout << "You entered:\t\t";
-        for (auto value : q) {
+        for (auto value : reversed(reversed(q))) {
             cout << value;
         }
-        cout << "\nReversed:   \t\t";
-        for (auto value : reversed(q)) {
+        cout << "\nReversed: \t\t";
+        for (auto value : reversed(reversed(reversed(q)))) {
             cout << value;
         }
         cout << endl;
