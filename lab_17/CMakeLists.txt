@@ -23,6 +23,14 @@ endif()
 include_directories(..)
 
 add_executable(part1 src/part1.cpp)
-add_custom_target(run
+add_custom_target(p1
     COMMAND ./part1
     DEPENDS part1)
+
+add_executable(part2 src/part2.cpp)
+add_custom_target(p2
+    COMMAND ./part2
+    DEPENDS part2)
+
+add_custom_target(run
+    DEPENDS p1 p2)

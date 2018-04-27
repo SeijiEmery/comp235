@@ -1,4 +1,4 @@
-#include <list>
+#include <vector>
 #include <iostream>
 #include <iomanip>
 
@@ -8,10 +8,11 @@ int main()
 {
     /*** Test common functions of containers ***/
     //default constructor
-    list<int> myList1;
+    vector<int> myList1;
+    myList1.reserve(3);
 
     //Get an appropriate iterator for myList1
-    list<int>::iterator iter1 = myList1.begin();
+    vector<int>::iterator iter1 = myList1.begin();
 
     //insert(pos, elem), 'pos' is an iterator
     myList1.insert(iter1, 111);
@@ -19,10 +20,10 @@ int main()
     myList1.insert(iter1, 333);
 
     //copy constructor
-    list<int> myList2(myList1);
+    vector<int> myList2(myList1);
 
     //Get an appropriate iterator for myList1
-    list<int>::iterator iter2 = myList2.begin();
+    vector<int>::iterator iter2 = myList2.begin();
 
     //erase(begin, end)
     myList2.erase(++iter2, myList2.end());
