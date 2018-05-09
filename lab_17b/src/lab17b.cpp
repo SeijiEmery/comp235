@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <unordered_map>
 using namespace std;
 
 int main()
@@ -51,30 +52,42 @@ int main()
     regex e("[^a-zA-Z\\s]"); 
     gdp = regex_replace (gdp, e, "");
 
-    //TO DO (1): Move words into a set   
-    std::set<std::string> words;
-    std::istringstream ss { gdp };
-    std::string word;
-    while (std::getline(ss, word, ' ')) {
-        words.insert(word);
-    }
-    words.erase(words.find(""));
+    {
+        std::set<std::string> words;
+        std::istringstream ss { gdp };
+        std::string word;
+        while (std::getline(ss, word, ' ')) {
+            words.insert(word);
+        }
+        words.erase(words.find(""));
 
-    //TO DO (2): Use the copy algorithm to iterate and display your set  
-    std::copy(
-        words.begin(), words.end(), 
-        std::ostream_iterator<string>(std::cout, " "));
-    cout << std::endl;
+        std::copy(
+            words.begin(), words.end(), 
+            std::ostream_iterator<string>(std::cout, " "));
+        cout << std::endl;
+    }
 
     //
     // PART 2
     //
+    {
+        std::cout << "\nWord counts:\n";
+        std::unordered_map<std::string, size_t> words;
+        std::istringstream ss { gdp };
+        std::string word;
+        while (std::getline(ss, word, ' ')) {
+            auto it = words.find(word);
+            if (it != words.end()) {
+                ++words[word];
+            } else {
+                words.emplace(word, 1);
+            }
+        }
+        words.erase(words.find(""));
 
-    //TO DO
-    //Create a dictionary of words and the number of occurences for each into a dictionary (use 'map')
-    //  (Hint: for each word check of it is already in the dictionary, 
-    //      1. if not, insert this new word in the dictionary, set count to 1
-    //      2. if it is, increment the count for the word
-
+        for (auto& kv : words) {
+            std::cout << kv.first << ": " << kv.second << '\n';
+        }
+    }
     return 0;
 }
