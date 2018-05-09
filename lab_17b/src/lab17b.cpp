@@ -52,10 +52,19 @@ int main()
     gdp = regex_replace (gdp, e, "");
 
     //TO DO (1): Move words into a set   
-    
+    std::set<std::string> words;
+    std::istringstream ss { gdp };
+    std::string word;
+    while (std::getline(ss, word, ' ')) {
+        words.insert(word);
+    }
+    words.erase(words.find(""));
+
     //TO DO (2): Use the copy algorithm to iterate and display your set  
-    
-    cout << endl;
+    std::copy(
+        words.begin(), words.end(), 
+        std::ostream_iterator<string>(std::cout, " "));
+    cout << std::endl;
 
     //
     // PART 2
