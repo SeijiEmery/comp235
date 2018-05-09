@@ -30,8 +30,26 @@ std::ostream& operator<< (std::ostream& os, const std::vector<T>& values) {
     return os;
 }
 
+struct Fibonacci {
+    int a = 0;
+    int b = 1;
+
+    Fibonacci () {}
+
+    int operator ()() {
+        int sum = a + b;
+        a = b;
+        b = sum;
+        return a;
+    }
+};
+
 int main () {
     srand(time(nullptr));
+
+    //
+    // Part 1
+    //
 
     std::vector<int> values (20);
     std::generate(values.begin(), values.end(), [](){ return rand() % 50; });
@@ -42,6 +60,13 @@ int main () {
 
     bubbleSort(values, &compareGreater);
     std::cout << "\nSorted (greater):\n" << values << '\n';
+
+    //
+    // Part 2
+    //
+
+    std::generate(values.begin(), values.end(), Fibonacci());
+    std::cout << "\nFibonacci:\n" << values << '\n';
 
     std::cout << '\n';
     return 0;
