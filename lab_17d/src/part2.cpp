@@ -3,8 +3,8 @@
 #include <iostream>
 #include <cstdlib>
 
-template <typename T>
-void bubbleSort (std::vector<T>& values, bool (*less)(const T&, const T&)) {
+template <typename T, typename F>
+void bubbleSort (std::vector<T>& values, const F& less) {
     for (size_t i = 0; i < values.size(); ++i) {
         for (size_t j = i; j < values.size(); ++j) {
             if (!less(values[i], values[j])) {
@@ -15,34 +15,12 @@ void bubbleSort (std::vector<T>& values, bool (*less)(const T&, const T&)) {
 }
 
 template <typename T>
-bool compareLess (const T& a, const T& b) {
-    return a < b;
-}
-template <typename T>
-bool compareGreater (const T& a, const T& b) {
-    return a > b;
-}
-template <typename T>
 std::ostream& operator<< (std::ostream& os, const std::vector<T>& values) {
     for (const auto& v : values) {
         os << v << ' ';
     }
     return os;
 }
-
-struct Fibonacci {
-    int a = 0;
-    int b = 1;
-
-    Fibonacci () {}
-
-    int operator ()() {
-        int sum = a + b;
-        a = b;
-        b = sum;
-        return a;
-    }
-};
 
 int main () {
     srand(time(nullptr));
@@ -55,17 +33,21 @@ int main () {
     std::generate(values.begin(), values.end(), [](){ return rand() % 50; });
     std::cout << "\nGenerated values:\n" << values << '\n';
 
-    bubbleSort(values, &compareLess);
+    bubbleSort(values, [](int a, int b) { return a < b; });
     std::cout << "\nSorted (less):\n" << values << '\n';
 
-    bubbleSort(values, &compareGreater);
+    bubbleSort(values, [](int a, int b) { return a > b; });
     std::cout << "\nSorted (greater):\n" << values << '\n';
 
     //
     // Part 2
     //
 
-    std::generate(values.begin(), values.end(), Fibonacci());
+    int a = 0, b = 1;
+    std::generate(values.begin(), values.end(), [&a,&b](){
+        int sum = a + b;
+        return a = b, b = sum, a;
+    });
     std::cout << "\nFibonacci:\n" << values << '\n';
 
     std::cout << '\n';
