@@ -22,7 +22,15 @@ endif()
 
 include_directories(..)
 
-add_executable(lab17 src/lab.cpp)
+add_executable(p1 src/part1.cpp)
+add_custom_target(part1
+    COMMAND ./p1
+    DEPENDS p1)
+
+add_executable(p2 src/part2.cpp)
+add_custom_target(part2
+    COMMAND ./p2
+    DEPENDS p2)
+
 add_custom_target(run
-    COMMAND ./lab17
-    DEPENDS lab17)
+    DEPENDS part1 part2)
