@@ -45,8 +45,7 @@ int main () {
 
     int a = 0, b = 1;
     std::generate(values.begin(), values.end(), [&a,&b](){
-        int sum = a + b;
-        return a = b, b = sum, a;
+        return a += b, std::swap(a, b), a;
     });
     std::cout << "\nFibonacci:\n" << values << '\n';
 
