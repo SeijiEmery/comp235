@@ -22,8 +22,12 @@ endif()
 
 include_directories(..)
 
-add_executable(gen src/generate.cpp)
+add_executable(generator src/generate.cpp)
 add_custom_target(generate
-    COMMAND ./gen
-    DEPENDS gen)
+    COMMAND ./generator
+    DEPENDS generator)
 
+add_executable(graph_groups src/graph_groups.cpp)
+add_custom_target(run
+    COMMAND ./graph_groups
+    DEPENDS graph_groups)

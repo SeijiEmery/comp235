@@ -62,7 +62,7 @@ int main (int argc, const char** argv) {
             a = verts[rand() % verts.size()];
             b = verts[rand() % verts.size()];
         } while (a == b);
-        printf("%d, %d\n", a, b);
+        printf("%d %d \n", a, b);
     }
     return 0;
 }
