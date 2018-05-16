@@ -19,7 +19,6 @@ Due to the above, graph_groups does NOT actually read in data from a file, but f
 
 ## To run from generated data set (\*nix)
     ./generator -v <num_vertices> -g <num_groups> [-c <avg_connections_per_vertex>] | make run
-eg.
     ./generator -v 20 -g 10 -c 3.5 | make run
     ./generator -v 200 -g 15 -c 10 | make run
     ./generator -v 10000 -g 2000 -c 2 | make run
