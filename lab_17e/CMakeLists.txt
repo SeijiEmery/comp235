@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (lab_18)
+project (lab_17e)
 
 SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
 SET (CMAKE_CXX_FLAGS                "-Wall")
