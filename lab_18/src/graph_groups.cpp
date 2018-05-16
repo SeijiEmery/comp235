@@ -80,6 +80,7 @@ int main (int argc, const char** argv) {
 
     for (size_t i = 0; i < groupVerts.size(); ++i) {
         std::cout << "Group " << (i + 1) << ": ";
+        std::sort(groupVerts[i].begin(), groupVerts[i].end());
         for (auto v : groupVerts[i]) {
             std::cout << v << ' ';
         }
