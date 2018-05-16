@@ -19,14 +19,11 @@ int main (int argc, const char** argv) {
         size_t first = line.find_first_not_of(" \t");
         size_t second = line.find_first_not_of(" \t", 
             line.find_first_of(" \t", first+1) + 1);
-
-        char *sptr = const_cast<char*>(line.c_str());
         int a = atoi(&line[first]);
         int b = atoi(&line[second]);
         if (a == b) {
             continue;
         }
-
         // std::cout << a << ", " << b << "\n";
 
         auto itA = vertexOwnership.find(a);
@@ -63,7 +60,6 @@ int main (int argc, const char** argv) {
                 // std::cout << "Merging groups " << groupA << " and " << groupB << '\n';
                 // merge groups
                 append(groupVerts[groupA], groupVerts[groupB]);
-                // groupVerts[groupA].insert(groupVerts[groupA].end(), groupVerts[groupB].begin(), groupVerts[groupB].end());
                 for (int v : groupVerts[groupB]) {
                     vertexOwnership[v] = groupA;
                 }
@@ -76,7 +72,6 @@ int main (int argc, const char** argv) {
                     for (int v : groupVerts[lastGroup]) {
                         vertexOwnership[v] = groupB;
                     }
-                    // groupVerts[groupB].insert(groupVerts[groupB].end(), )
                 }
                 groupVerts.pop_back();
             }
