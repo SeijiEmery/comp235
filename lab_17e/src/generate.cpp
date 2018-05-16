@@ -1,3 +1,36 @@
+// generate.cpp
+// copyright (c) Seiji Emery, 5/15/18
+// https://github.com/SeijiEmery/comp235/tree/master/lab_17e
+//
+// Generates graph data to be used by graph_groups.cpp (ie. 'make run', or ./graph_groups)
+// Output is sent to stdout and can be piped into ./graph_groups and/or local files.
+// stderr is used to display optional debug messages, ie. all groups / verts generated.
+//
+// Specifically, this program generates:
+//      N random, unique vertices
+//      divided into M groups, with at least 2 vertices per group
+//      connected by an average of C connections (edges) per vertex, clamped >= 1.0
+//      all vertices, and all edges are shuffled, and emitted as N * C lines of the form:
+//          <vert1> <vert2>
+//      eg.
+//          2 4
+//          4 6
+//          11 4
+//
+// invoke as:
+//      ./generate <args...> > some_file.txt
+// or   ./generate <args...> | make run
+// or   time ./generate <args...> --debug > /dev/null
+//
+// Arguments:
+//      -v, --vertices    <num_vertices>   (# vertices total to generate)
+//      -g, --groups      <num_groups>     (# groups to generate - verts split between groups)
+//      -c, --connections <connections>    (# edges per vertex (avg), clamped to >= 1.0)
+//      --min <min_vertex_id>              (min vertex #)
+//      --max <max_vertex_id>              (max vertex #)
+//      --debug                            (turns debugging on: displays all groups / vertices to stderr)
+//      --ndebug                           (turns debugging off)
+//
 #include <cstdlib>
 #include <cstdio>
 #include <vector>

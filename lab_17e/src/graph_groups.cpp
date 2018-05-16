@@ -1,3 +1,31 @@
+// graph_groups.cpp
+// copyright (c) Seiji Emery, 5/15/18
+// https://github.com/SeijiEmery/comp235/tree/master/lab_17e
+//
+// Reads in graph edge information from stdin using the following line-based
+// format, traces the edges to find all connected graphs ("groups"), then
+// prints each group to stdout.
+//
+// input:
+//      2 4
+//      4 6
+//      11 4
+//      3 12
+//
+// output:
+//      Group 1: 2 4 6 11
+//      Group 2: 3 12
+//
+// Since reads in data from stdin, invoking without arguments will just consume
+// and wait for input forever. 
+//
+// To run, pipe in data from either a file or generate.cpp:
+//      cat <some_file> | make run
+//  or  make generator; ./generator <args...> | make run
+//
+// Sample data is in ../data/connectedGraphs.txt
+// For generator args, see generate.cpp
+//
 #include <iostream>
 #include <unordered_map>
 #include <vector>
