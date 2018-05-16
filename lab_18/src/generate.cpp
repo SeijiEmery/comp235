@@ -1,10 +1,16 @@
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
+#include <set>
 #include <algorithm>
+#include <random>
 
 int main (int argc, const char** argv) {
-    int numVerts = 20;
+    int     numVerts  = 200;
+    int     numGroups = 5;
+    double  connectionsPerVertex = 3.0;
+
+    // int numVerts = 20;
     int numEdges = 100;
     int min      = 0;
     int max      = 0;
@@ -49,20 +55,61 @@ int main (int argc, const char** argv) {
         fprintf(stderr, "usage: %s -v <num_verts> -e <num_edges> [--min <min> --max <max>]", argv[0]);
         exit(-1);
     }
-
     // Generate random vertices
     srand(time(nullptr));
-    std::vector<int> verts (numVerts);
-    std::generate(verts.begin(), verts.end(), [&](){ return rand() % (numVerts * 12); });
+    std::set<int> uniqueVerts;
 
-    // Generate + output random edges (to stdout, can pipe to file if desired)
-    while (numEdges --> 0) {
-        int a, b;
-        do {
-            a = verts[rand() % verts.size()];
-            b = verts[rand() % verts.size()];
-        } while (a == b);
-        printf("%d %d \n", a, b);
+    assert(max > min + numVerts);
+    while (uniqueVerts.size() < numVerts) {
+        uniqueVerts.insert(min + rand() % (max - min));
+    }
+    std::vector<std::vector<int>> groupVerts (numGroups);
+    {   
+        // Insert vertices into random groups
+        auto it = uniqueVerts.begin(), end = uniqueVerts.end();
+
+        // Ensure each group has at least 2 vertices
+        for (auto& group : groupVerts) {
+            assert(it != end); group.push_back(*it); ++it;
+            assert(it != end); group.push_back(*it); ++it;
+        }
+        // Insert all remaining vertices
+        for (; it != end; ++it) {
+            groupVerts[rand() % numGroups].push_back(*it);
+        }
+    }
+    fprintf(stderr, "Running generator\n");
+    for (int i = 0; i < groupVerts.size(); ++i) {
+        fprintf(stderr, "  generated group %d: ", i + 1);
+        for (auto v : groupVerts[i]) {
+            fprintf(stderr, "%d ", v);
+        }
+        fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "\n");
+
+
+    std::vector<std::pair<int, int>> edges;
+    for (auto& group : groupVerts) {
+        for (size_t i = 0; i < group.size(); ++i) {
+            int n = static_cast<int>(static_cast<double>(rand() % 1000) * connectionsPerVertex) / 1000;
+            while (n --> 0) {
+                size_t j = rand() % group.size();
+                if (rand() & 1) {
+                    edges.emplace_back(group[i], group[j]);
+                } else {
+                    edges.emplace_back(group[j], group[i]);
+                }
+            }
+        }
+    }
+    // Shuffle edges
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(edges.begin(), edges.end(), std::default_random_engine(seed));
+
+    // Output edges
+    for (auto& edge : edges) {
+        printf("%d %d\n", edge.first, edge.second);
     }
     return 0;
 }
