@@ -25,7 +25,8 @@
 // Arguments:
 //      -v, --vertices    <num_vertices>   (# vertices total to generate)
 //      -g, --groups      <num_groups>     (# groups to generate - verts split between groups)
-//      -c, --connections <connections>    (# edges per vertex (avg), clamped to >= 1.0)
+//      -e, --edges       <num_edges>      (# edges to generate (total lines, low values will reduce groups))
+//      -cf, --connections <connections>   (edge factor: # edges / vertex)
 //      --min <min_vertex_id>              (min vertex #)
 //      --max <max_vertex_id>              (max vertex #)
 //      --debug                            (turns debugging on: displays all groups / vertices to stderr)
@@ -43,6 +44,7 @@
 int main (int argc, const char** argv) {
     int     numVerts  = 200;
     int     numGroups = 5;
+    int     numEdges  = 0;
     double  connectionsPerVertex = 3.0;
     int min      = 0;
     int max      = 0;
@@ -66,8 +68,9 @@ int main (int argc, const char** argv) {
     // parseArgs(count, &args[0])
     parseArgs(argc, argv)
         .parse({ "-v", "--verts" }, numVerts)
+        .parse({ "-e", "--edges" }, numEdges)
         .parse({ "-g", "--groups" }, numGroups)
-        .parse({ "-c", "--connections" }, connectionsPerVertex)
+        .parse({ "-cf", "--connections" }, connectionsPerVertex)
         .parse({ "--min" }, min)
         .parse({ "--max" }, max)
         .parse({ "--debug" }, [&](){ debug = true; })
@@ -87,6 +90,13 @@ int main (int argc, const char** argv) {
     if (connectionsPerVertex <= 0.0) {
         fprintf(stderr, "num connections (per vertex) must be > 0 (got %lf)\n", connectionsPerVertex);
         exit(-1);
+    }
+    if (numEdges <= 0) {
+        numEdges = static_cast<int>(numVerts * connectionsPerVertex);
+    }
+    if (numEdges < numVerts + numVerts / 2) {
+        fprintf(stderr, "Warning: low #edges = %d (#verts = %d, #groups = %d), data may be truncated\n",
+            numEdges, numVerts, numGroups);
     }
     if (!min || !max) {
         if (max && !min) {
@@ -154,6 +164,8 @@ int main (int argc, const char** argv) {
 
     // Generate adjacent edges
     connectionsPerVertex -= 1;
+
+    // Generate crappy MST edges so all vertices are spanned by each group
     for (auto& group : groupVerts) {
         for (size_t i = 1; i < group.size(); ++i) {
             if (rand() & 1) {
@@ -162,24 +174,25 @@ int main (int argc, const char** argv) {
                 edges.emplace_back(group[i - 1], group[i]);
             }
         }
+    }
 
-        if (connectionsPerVertex <= 0)
-            continue;
-        for (size_t i = 0; i < group.size(); ++i) {
-            int n = static_cast<int>(static_cast<double>(rand() % 1000) * connectionsPerVertex) / 1000;
-            while (n --> 0) {
-                size_t j = rand() % group.size();
-                if (rand() & 1) {
-                    edges.emplace_back(group[i], group[j]);
-                } else {
-                    edges.emplace_back(group[j], group[i]);
-                }
-            }
-        }
+    // Generate additional random edges (iff necessary)
+    for (int n = numEdges - edges.size(); n --> 0; ) {
+        int group = rand() % groupVerts.size();
+        int i = rand() % groupVerts[group].size(), j;
+        do {
+            j = rand() % groupVerts[group].size();
+        } while (j == i);
+        edges.emplace_back(groupVerts[group][i], groupVerts[group][j]);
     }
 
     // Shuffle edges
     std::shuffle(edges.begin(), edges.end(), rng);
+
+    // Trim edges down to generated #
+    if (edges.size() > numEdges) {
+        edges.resize(numEdges);
+    }
 
     // Output edges
     for (auto& edge : edges) {
