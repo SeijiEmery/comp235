@@ -4,37 +4,34 @@ using namespace std;
 class Glob
 {
 public:
-    Glob() { *dataPtr = 111; }
-    Glob(const Glob& lvalueP)
-    {
-        cout << "Regular constructor is called!\n";
-        *dataPtr = 111;
-        //...
+    typedef Glob This;
+    Glob () : Glob(111) {}
+    Glob (int value) : dataPtr(new int(value)) {}
+    Glob (const Glob& other) : dataPtr(new int(*other.dataPtr)) {
+        std::cout << "Copy constructor called!\n";
     }
-
-    Glob(Glob&& rvalueP)
-    {
-        cout << "Move constructor is called!\n";
-        dataPtr = rvalueP.dataPtr; //Steal address
-        rvalueP.dataPtr = nullptr; //remove ownership
-        //...
+    Glob (Glob&& other) {
+        std::cout << "Move constructor called!\n";
+        std::swap(dataPtr, other.dataPtr);
     }
-
-    Glob operator+ (const Glob& p_glob)     //Coded to produce
-                            // a rvalue
-    {
-        Glob temp;
-        *(temp.dataPtr) = *dataPtr + *(p_glob.dataPtr);
-        return temp;
+    ~Glob () {
+        if (dataPtr) {
+            delete dataPtr;
+        }
     }
-
-    //0. Run this code and observe the outputs from the driver given below
-    //I. Overload the assignment operator, using a regular lvalue reference parameter
-    //II. Overload the assignment operator, using rvalue reference paramter
-    //III. Then in the driver, demonstrate assignments in the similar way 
-
+    Glob operator+ (const Glob& other) {
+        return { *dataPtr + *other.dataPtr };
+    }
+    This& operator= (const This& other) {
+        std::cout << "Assignment operator called!\n";
+        return *dataPtr = *other.dataPtr, *this;
+    }
+    This& operator= (This&& other) {
+        std::cout << "Move assignment called!\n";
+        return std::swap(dataPtr, other.dataPtr), *this;
+    }
 private:
-    int *dataPtr = new int;                              
+    int *dataPtr;                              
 };
 
 int main()
@@ -48,6 +45,10 @@ int main()
     globbie5 = globbie1;
     Glob globbie6;
     globbie6 = globbie1 + globbie2;
+
+    // move assignment
+    globbie4 = std::move(globbie1);
+    std::swap(globbie1, globbie3);
 
     return 0;
 }
